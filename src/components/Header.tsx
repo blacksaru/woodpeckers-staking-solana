@@ -19,7 +19,7 @@ export default function Header() {
     <header className="header">
       <div className="header-content">
         <div className="header-left">
-          <Link href="https://apexpredator.army">
+          <Link href="/">
             <a>
               {/* eslint-disable-next-line */}
               <img src="/img/logo.svg" alt="" />
