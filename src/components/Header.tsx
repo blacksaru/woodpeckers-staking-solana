@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { CloseIcon, DiscordIcon, MenuIcon, TwitterIcon } from "./svgIcons";
-import Image from "next/image";
 
 export default function Header() {
   const wallet = useWallet();
