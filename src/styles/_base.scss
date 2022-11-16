@@ -435,9 +435,187 @@ html {
             font-size: 36px;
             line-height: 39px;
             color: #0fdc82;
+            margin-right: 20px;
         }
     }
 }
 .top-value-banner .main-box .main-box-content {
     padding: 16px;
+}
+
+.top-value-banner-two {
+    margin-top: 58px;
+    position: relative;
+    h1 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 35px;
+        text-align: center;
+
+        color: #ffffff;
+    }
+    .collect-rewards {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 17px;
+        text-transform: uppercase;
+        padding: 8px 14px;
+        color: #ffffff;
+        background-color: transparent;
+        border-radius: 30px;
+        border: 1px solid #0fdc82;
+        position: absolute;
+        right: 0;
+        top: 0;
+        &:hover {
+            background-color: #a5f9cf;
+            color: #1e1e1e;
+        }
+        &:active {
+            background-color: #0fdc82;
+            color: #1e1e1e;
+        }
+    }
+    .two-content {
+        display: flex;
+        gap: 20px;
+        margin-top: 32px;
+        .main-box {
+            &:first-child {
+                width: calc(60% - 10px);
+            }
+            &:last-child {
+                width: calc(40% - 10px);
+            }
+            .main-box-content {
+                padding: 14px;
+            }
+        }
+    }
+}
+
+.collection-box {
+    margin-top: 32px;
+    h3 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 35px;
+
+        color: #ffffff;
+    }
+    .action-buttons {
+        position: absolute;
+        right: 32px;
+        top: 32px;
+    }
+}
+.btn-action {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 17px;
+    padding: 8px 16px;
+    text-transform: uppercase;
+    color: #ffffff;
+    background-color: #1e1e1e;
+    border: 1px solid #0fdc82;
+    border-radius: 50px;
+    margin-left: 8px;
+    &:hover {
+        background-color: #a5f9cf;
+        color: #1e1e1e;
+    }
+    &:active {
+        background-color: #0fdc82;
+        color: #1e1e1e;
+    }
+}
+.nft-gallery {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+.unstaked-card {
+    width: 128px;
+    height: 128px;
+}
+.nft-card {
+    position: relative;
+    .nft-id {
+        position: absolute;
+        left: 8px;
+        top: 8px;
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 400;
+        font-size: 9px;
+        line-height: 10px;
+        color: #1e1e1e;
+        background-color: #0fdc82;
+        border-radius: 40px;
+        padding: 2px 6px;
+        z-index: 8;
+    }
+    .selected {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 128px;
+        height: 128px;
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+        border-radius: 15px;
+        background-color: #a5f9cf80;
+        p {
+            color: #1e1e1e;
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 700;
+            font-size: 16px;
+            line-height: 17px;
+            text-align: center;
+        }
+    }
+}
+.nft-image {
+    width: 128px;
+    height: 128px;
+    position: relative;
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 15px;
+        position: relative;
+        z-index: 1;
+    }
+    &::before {
+        content: "";
+        border-radius: 15px;
+        background-color: #a5f9cf80;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 128px;
+        height: 128px;
+        z-index: 2;
+        display: none;
+    }
+    &:hover {
+        &::before {
+            display: block;
+        }
+    }
 }

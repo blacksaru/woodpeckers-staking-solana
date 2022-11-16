@@ -11,10 +11,7 @@ const Home: NextPage = () => {
       <div className="container">
         <MainBox title="Blazin Woodpeckers">
           <div className="link-buttons">
-            <div
-              className="img-button"
-              onClick={() => router.push("/staking:genesis")}
-            >
+            <div className="img-button" onClick={() => router.push("/staking")}>
               <div className="img-button-content">
                 <div className="img-box">
                   <img src="/img/genesis.svg" alt="" />
@@ -26,10 +23,7 @@ const Home: NextPage = () => {
                 <br /> Collection
               </p>
             </div>
-            <div
-              className="img-button"
-              onClick={() => router.push("/staking:genesis")}
-            >
+            <div className="img-button" onClick={() => router.push("/staking")}>
               <div className="img-button-content">
                 <div className="img-box">
                   <img src="/img/nest.svg" alt="" />
