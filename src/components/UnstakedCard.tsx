@@ -1,23 +1,27 @@
 /* eslint-disable @next/next/no-img-element */
-import React from "react";
+import React, { useEffect } from "react";
 import { CheckIcon } from "./svgIcons";
 
 export default function UnstakedCard(props: {
-  id: number;
+  id: string;
+  handleSelect: Function;
+  mint: string;
+  uri?: string;
   name?: string;
   image?: string;
   selected?: boolean;
   isNest?: boolean;
 }) {
-  const { id, name, image, selected, isNest } = props;
+  const { id, name, image, selected, isNest, handleSelect, mint } = props;
   return (
-    <div className="nft-card unstaked-card">
+    <div className="nft-card unstaked-card" onClick={() => handleSelect(mint)}>
       <div className="nft-id">#{id}</div>
       <div className="nft-image">
-        <img
-          src="https://img-cdn.magiceden.dev/rs:fill:250:250:0:0/plain/https://metadata.degods.com/g/3527-dead.png"
-          alt=""
-        />
+        {image === "" ? (
+          <div className="empty-image"></div>
+        ) : (
+          <img src={image} alt="" />
+        )}
       </div>
       {selected && (
         <div className="selected">

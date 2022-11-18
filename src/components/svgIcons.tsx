@@ -162,3 +162,27 @@ export const CheckIcon = () => {
     </svg>
   );
 };
+
+export const CircleClose = () => {
+  return (
+    <svg
+      width="32"
+      height="32"
+      viewBox="0 0 32 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="16" cy="16" r="16" fill="#A5F9CF" />
+      <path
+        d="M23.3453 23.3452L8.88893 8.88881"
+        stroke="black"
+        strokeLinecap="round"
+      />
+      <path
+        d="M23.3453 8.88867L8.88893 23.3451"
+        stroke="black"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
