@@ -1572,8 +1572,8 @@ export const createWithdrawRansackNftTx = async (
     });
   }
 
-  let ret1: { instructions: any; destinationAccounts: any };
-  let ret2: { instructions: any; destinationAccounts: any };
+  let ret1: { instructions: any; destinationAccounts: any } | any;
+  let ret2: { instructions: any; destinationAccounts: any } | any;
   if (detail?.rewardStyle.toNumber() === 2) {
     ret1 = await getATokenAccountsNeedCreate(
       connection,
@@ -1960,6 +1960,7 @@ export const getNestedData = async (
     provider
   );
   let nestState = await getNestPoolState(userAddress);
+  if (nestState === null) return null;
   let woodPeckers: any[] = [];
   try {
     for (let i = 0; i < nestState.stakedCount.toNumber(); i++) {
@@ -1988,7 +1989,7 @@ export const getRansackData = async (
     STAKING_PROGRAM_ID,
     provider
   );
-  let nestState = await getNestPoolState(userAddress, program);
+  let nestState = await getNestPoolState(userAddress);
   if (nestState === null) return null;
   let woodPeckers: any[] = [];
   try {
@@ -2019,6 +2020,7 @@ export const getRansackedDetail = async (
     provider
   );
   let nestState = await getNestPoolState(userAddress);
+  if (nestState == null) return null;
   let detail: any;
   try {
     for (let i = 0; i < nestState.stakedCount.toNumber(); i++) {
@@ -2068,7 +2070,7 @@ export const getAllStakedNFTs = async (
       buf = data.slice(48, 56).reverse();
       const accumulatedReward = new anchor.BN(buf);
 
-      let staking = [];
+      let staking: any = [];
       for (let i = 0; i < stakedCount.toNumber(); i++) {
         const mint = new PublicKey(data.slice(i * 56 + 56, i * 56 + 88));
 
