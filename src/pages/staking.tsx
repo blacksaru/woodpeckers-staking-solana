@@ -6,13 +6,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import MainBox from "../components/MainBox";
-import UnstakedCard from "../components/UnstakedCard";
-import { getNftMetaData, solConnection } from "../contexts/utils";
-import { CREATOR_ADDRESS_BLAZIN, CREATOR_ADDRESS_NEST } from "../config";
-import { PublicKey } from "@solana/web3.js";
-import Skeleton from "@mui/material/Skeleton";
+import { solConnection } from "../contexts/utils";
+import { CREATOR_ADDRESS_BLAZIN, CREATOR_ADDRESS_NEST, EPOCH } from "../config";
 import CollectionBox from "../components/CollectionBox";
 import Header from "../components/Header";
+import { getAllNFTs, getGlobalInfo } from "../contexts/transaction";
+import CollectionStakedBox from "../components/CollectionStakedBox";
 
 export interface NFTType {
   mint: string;
@@ -24,6 +23,10 @@ export interface NFTType {
   tier: string;
   staked: boolean;
   isMulti: boolean;
+  stakedTime: number;
+  lockTime: number;
+  lockLength: number;
+  claimable: number;
 }
 
 const StakingPage: NextPage = () => {
@@ -33,6 +36,10 @@ const StakingPage: NextPage = () => {
   const [nests, setNests] = useState<NFTType[]>();
   const [loading, setLoading] = useState(false);
   const [isOverlay, setIsOverlay] = useState(false);
+
+  const [totalStakedCount, setTotalStakedCount] = useState(0);
+  const [totalRewardDistributed, setTotalRewardDistributed] = useState(0);
+
   const getWalletNfts = async () => {
     if (wallet.publicKey === null) {
       setBlazins([]);
@@ -41,11 +48,19 @@ const StakingPage: NextPage = () => {
     }
     setLoading(true);
     let nfts: NFTType[] = [];
+    const stakedNfts = await getAllNFTs();
+    let userNfts: any = [];
+    if (stakedNfts && stakedNfts.count !== 0 && stakedNfts.data) {
+      userNfts = stakedNfts.data.filter(
+        (user) => user.owner === wallet.publicKey?.toBase58()
+      )[0].staking;
+    }
+    console.log(stakedNfts, "==> staked nfts");
     const nftList = await getParsedNftAccountsByOwner({
       publicAddress: wallet.publicKey.toBase58(),
       connection: solConnection,
     });
-    console.log(nftList, "==> nft list");
+
     let blazinList: NFTType[] = [];
     let nestsList: NFTType[] = [];
     for (let item of nftList) {
@@ -61,8 +76,27 @@ const StakingPage: NextPage = () => {
           name: item.data.name,
           selected: false,
           tier: "0",
-          staked: false,
+          staked: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? true
+            : false,
           isMulti: false,
+          stakedTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                .stakedTime
+            : new Date().getTime() / 1000,
+          lockTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].lockTime
+            : new Date().getTime() / 1000,
+          claimable: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].claimable
+            : 0,
+          lockLength: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? (userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                .lockTime -
+                userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                  .stakedTime) /
+              EPOCH
+            : 0,
         });
       } else if (
         item.data.creators &&
@@ -76,8 +110,27 @@ const StakingPage: NextPage = () => {
           name: item.data.name,
           selected: false,
           tier: "0",
-          staked: false,
+          staked: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? true
+            : false,
           isMulti: false,
+          stakedTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                .stakedTime
+            : new Date().getTime() / 1000,
+          lockTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].lockTime
+            : new Date().getTime() / 1000,
+          claimable: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].claimable
+            : 0,
+          lockLength: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+            ? (userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                .lockTime -
+                userNfts.filter((nft: any) => nft.mint === item.mint)[0]
+                  .stakedTime) /
+              EPOCH
+            : 0,
         });
       }
     }
@@ -125,16 +178,28 @@ const StakingPage: NextPage = () => {
     for (let i = 0; i < nestsList.length; i++) {
       nestsList[i].image = nestMetaList[i].image;
     }
-
+    console.log("blazinList =>", blazinList);
+    console.log("nestsList =>", nestsList);
     setBlazins(blazinList);
     setNests(nestsList);
     setLoading(false);
   };
 
-  const handleSelect = () => {};
+  const getAllGlobalData = async () => {
+    const data = await getGlobalInfo();
+    if (data) {
+      setTotalStakedCount(data.totalStakedCount);
+      setTotalRewardDistributed(data.totalRewardDistributed);
+    }
+  };
+
+  const updatePage = () => {
+    getWalletNfts();
+    getAllGlobalData();
+  };
 
   useEffect(() => {
-    getWalletNfts();
+    updatePage();
   }, [wallet.publicKey, wallet.connected]);
 
   return (
@@ -152,14 +217,14 @@ const StakingPage: NextPage = () => {
             <MainBox>
               <div className="total-values">
                 <p>Total Staked</p>
-                <h2>44.456%</h2>
+                <h2>{((totalStakedCount / 5555) * 100).toFixed(2)}%</h2>
               </div>
             </MainBox>
             <MainBox>
               <div className="total-values">
                 <p>Rewards Distributed</p>
                 <h2 style={{ fontWeight: 400 }}>
-                  <span>398,876.00 </span>$Blaze
+                  <span>{totalRewardDistributed.toLocaleString()} </span>$Blaze
                 </h2>
               </div>
             </MainBox>
@@ -189,21 +254,38 @@ const StakingPage: NextPage = () => {
           </div>
 
           <CollectionBox
+            wallet={wallet}
             title="Blazin Woodpeckers Genesis Collections"
             nftList={blazins}
             loading={loading}
             setNfts={setBlazins}
             isOverlay={isOverlay}
             setIsOverlay={setIsOverlay}
+            updatePage={updatePage}
           />
 
+          {blazins?.filter((nft) => nft.staked).length !== 0 && (
+            <CollectionStakedBox
+              wallet={wallet}
+              title="Blazin Woodpeckerz Staked"
+              nftList={blazins}
+              loading={loading}
+              setNfts={setBlazins}
+              isOverlay={isOverlay}
+              setIsOverlay={setIsOverlay}
+              updatePage={updatePage}
+            />
+          )}
+
           <CollectionBox
+            wallet={wallet}
             title="Nest Collections"
             nftList={nests}
             loading={loading}
             setNfts={setNests}
             isOverlay={isOverlay}
             setIsOverlay={setIsOverlay}
+            updatePage={updatePage}
           />
           {isOverlay && <div className="overlay-back"></div>}
         </div>

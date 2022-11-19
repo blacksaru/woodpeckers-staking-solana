@@ -1,10 +1,8 @@
 import { Edition } from "@metaplex-foundation/mpl-token-metadata";
 import * as anchor from "@project-serum/anchor";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
 import { IDL as StakingIDL } from "./staking";
 import {
-  Keypair,
   PublicKey,
   Connection,
   SystemProgram,
@@ -188,18 +186,18 @@ export const stakeNFT = async (
     provider
   );
 
-  let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
-    userAddress,
-    "user-pool",
-    STAKING_PROGRAM_ID
-  );
-
-  let poolAccount = await solConnection.getAccountInfo(userPoolKey);
-  if (poolAccount === null || poolAccount.data === null) {
-    await initUserPool(wallet);
-  }
   try {
     setLoading(true);
+    let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
+      userAddress,
+      "user-pool",
+      STAKING_PROGRAM_ID
+    );
+
+    let poolAccount = await solConnection.getAccountInfo(userPoolKey);
+    if (poolAccount === null || poolAccount.data === null) {
+      await initUserPool(wallet);
+    }
     let transactions: Transaction[] = [];
     for (let i = 0; i < nfts.length; i++) {
       const tx = await createStakeNftTx(
@@ -1857,6 +1855,7 @@ export const getGlobalInfo = async () => {
   const result = {
     admin: globalPool.superAdmin.toBase58(),
     totalStakedCount: globalPool.totalStakedCount.toNumber(),
+    totalRewardDistributed: globalPool.totalRewardDistributed.toNumber(),
   };
 
   return result;
@@ -2077,15 +2076,15 @@ export const getAllStakedNFTs = async (
         buf = data.slice(i * 56 + 88, i * 56 + 96).reverse();
         const stakedTime = new anchor.BN(buf);
         buf = data.slice(i * 56 + 96, i * 56 + 104).reverse();
-        const claimedTime = new anchor.BN(buf);
+        const lockTime = new anchor.BN(buf);
         buf = data.slice(i * 56 + 104, i * 56 + 112).reverse();
-        const rarity = new anchor.BN(buf);
+        const claimable = new anchor.BN(buf);
 
         staking.push({
           mint,
           stakedTime,
-          claimedTime,
-          rarity,
+          lockTime,
+          claimable,
         });
       }
 

@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { NFTType } from "../pages/staking";
 import Skeleton from "@mui/material/Skeleton";
-import UnstakedCard from "./UnstakedCard";
-import { CircleClose } from "./svgIcons";
 import { PublicKey } from "@solana/web3.js";
-import PlanItem from "./PlanItem";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import StakedCard from "./StakedCard";
 
-export default function CollectionBox(props: {
+export default function CollectionStakedBox(props: {
   wallet: WalletContextState;
   loading: boolean;
   title: string;
@@ -74,67 +72,6 @@ export default function CollectionBox(props: {
               : "linear-gradient(92.79deg, #373737 0%, #2b2b2b 100%)",
         }}
       >
-        {isOverlay && isReady && (
-          <div className="box-overlay">
-            <button className="overlay-close" onClick={closeOverlay}>
-              <CircleClose />
-            </button>
-            <div className="overlay-content">
-              <h3>{title}</h3>
-              <p className="p-text-1">Select a Staking Plan</p>
-              <div className="plans-box">
-                <PlanItem
-                  wallet={wallet}
-                  title="Unlocked"
-                  description={
-                    <p>
-                      You get: <br /> 2.5 $BLAZE a day
-                    </p>
-                  }
-                  lockTime={0}
-                  selectedNfts={selectedNfts}
-                  updatePage={updatePage}
-                />
-                <PlanItem
-                  wallet={wallet}
-                  title="10 Days"
-                  description={
-                    <p>
-                      Lock in 100 $BLAZE <br /> 7 $BLAZE a day
-                    </p>
-                  }
-                  lockTime={10}
-                  selectedNfts={selectedNfts}
-                  updatePage={updatePage}
-                />
-                <PlanItem
-                  wallet={wallet}
-                  title="20 Days"
-                  description={
-                    <p>
-                      Lock in 200 $BLAZE <br /> 10 $BLAZE a day
-                    </p>
-                  }
-                  lockTime={20}
-                  selectedNfts={selectedNfts}
-                  updatePage={updatePage}
-                />
-                <PlanItem
-                  wallet={wallet}
-                  title="35 Days"
-                  description={
-                    <p>
-                      Lock in 300 $BLAZE <br /> 10 $BLAZE a day
-                    </p>
-                  }
-                  lockTime={35}
-                  selectedNfts={selectedNfts}
-                  updatePage={updatePage}
-                />
-              </div>
-            </div>
-          </div>
-        )}
         <h3>{title}</h3>
         <div className="action-buttons">
           <button
@@ -142,10 +79,17 @@ export default function CollectionBox(props: {
             disabled={selectedNfts.length === 0}
             onClick={() => handleIsReady("single")}
           >
-            stake
+            collect rewards
+          </button>
+          <button
+            className="btn-action"
+            disabled={selectedNfts.length === 0}
+            onClick={() => handleIsReady("single")}
+          >
+            unstake
           </button>
           <button className="btn-action" onClick={() => handleIsReady("all")}>
-            stake all
+            unstake all
           </button>
         </div>
         {!(isOverlay && isReady) && (
@@ -163,16 +107,19 @@ export default function CollectionBox(props: {
                 ))}
               </div>
             ) : (
-              <div className="nft-gallery">
+              <div className="nft-gallery staked-gallery">
                 {nftList &&
                   nftList.length !== 0 &&
                   nftList.map(
                     (item, key) =>
-                      !item.staked && (
-                        <UnstakedCard
+                      item.staked && (
+                        <StakedCard
+                          wallet={wallet}
                           id={item.id}
                           mint={item.mint}
                           uri={item.uri}
+                          lockTime={item.lockTime}
+                          lockLength={item.lockLength}
                           key={key}
                           image={item.image}
                           selected={item.selected}
