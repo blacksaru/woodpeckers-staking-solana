@@ -81,7 +81,7 @@ export default function CollectionStakedBox(props: {
           >
             collect rewards
           </button>
-          <button
+          {/* <button
             className="btn-action"
             disabled={selectedNfts.length === 0}
             onClick={() => handleIsReady("single")}
@@ -90,7 +90,7 @@ export default function CollectionStakedBox(props: {
           </button>
           <button className="btn-action" onClick={() => handleIsReady("all")}>
             unstake all
-          </button>
+          </button> */}
         </div>
         {!(isOverlay && isReady) && (
           <>

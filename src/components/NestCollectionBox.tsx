@@ -4,8 +4,11 @@ import { NFTType } from "../pages/staking";
 import Skeleton from "@mui/material/Skeleton";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import NestUnstakedCard from "./NestUnstakedCard";
-import { CircleClose } from "./svgIcons";
+import { BoxBackIcon, CircleClose } from "./svgIcons";
 import UnstakedCardAtNest from "./UnstakedCardAtNest";
+import { PublicKey } from "@solana/web3.js";
+import { errorAlert } from "./toastGroup";
+import NestPlanItem from "./NestPlanItem";
 
 export default function NestCollectionBox(props: {
   wallet: WalletContextState;
@@ -35,12 +38,38 @@ export default function NestCollectionBox(props: {
   const [selectedNest, setSelectedNest] = useState<NFTType>();
   const [maxWpCnt, setMaxWpCnt] = useState(1);
   const [isShowWps, setIsShowWps] = useState(false);
+  const [isStakingPlan, setIsStakingPlan] = useState(false);
+  const [tier, setTier] = useState(1);
 
   const [blazins, setBlazins] = useState<NFTType[]>();
+  const [selectedNfts, setSelectedNfts] = useState<{ mint: PublicKey }[]>([]);
+  const [selectedMainNfts, setSelectedMainNfts] = useState<
+    { mint: PublicKey }[]
+  >([]);
+
+  const update = () => {
+    updatePage();
+    closeOverlay();
+  };
 
   const closeOverlay = () => {
     setIsReady(false);
     setIsOverlay(false);
+    setIsStakingPlan(false);
+    setSelectedMainNfts([]);
+  };
+
+  const closeIsShowWps = () => {
+    if (selectedNfts.length <= maxWpCnt) {
+      setIsShowWps(false);
+      setSelectedMainNfts(selectedNfts);
+    } else {
+      errorAlert(`Max WP amount should be ${maxWpCnt}`);
+    }
+  };
+
+  const closeClerIsShowWps = () => {
+    setIsShowWps(false);
   };
 
   const showSelectBox = () => {
@@ -48,22 +77,48 @@ export default function NestCollectionBox(props: {
     setIsReady(true);
   };
 
-  const handleSelect = () => {};
+  const handleSelect = (mint: string) => {
+    let nfts = blazins;
+    let selected: { mint: PublicKey }[] = [];
+    if (nfts) {
+      for (let i = 0; i < nfts.length; i++) {
+        if (nfts[i].mint === mint) {
+          nfts[i].selected = !nfts[i].selected;
+        }
+        if (nfts[i].selected) {
+          selected.push({ mint: new PublicKey(nfts[i].mint) });
+        }
+      }
+      setSelectedNfts(selected);
+      // console.log(selected);
+    }
+    setForceRender(!forceRender);
+  };
 
   useEffect(() => {
-    setBlazins(wpNftList);
+    if (wpNftList) {
+      let newWps: NFTType[] = wpNftList;
+      for (let i = 0; i < wpNftList.length; i++) {
+        newWps[i].selected = false;
+      }
+      setBlazins(newWps);
+    }
     if (selectedNest) {
       switch (selectedNest.tier) {
         case "1":
+          setTier(1);
           setMaxWpCnt(2);
           break;
         case "2":
+          setTier(2);
           setMaxWpCnt(5);
           break;
         case "3":
+          setTier(3);
           setMaxWpCnt(8);
           break;
         default:
+          setTier(1);
           setMaxWpCnt(2);
           break;
       }
@@ -88,72 +143,193 @@ export default function NestCollectionBox(props: {
       >
         {isOverlay && isReady && (
           <div className="box-overlay">
-            <button className="overlay-close" onClick={closeOverlay}>
-              <CircleClose />
-            </button>
+            {!isShowWps ? (
+              <button
+                className="box-icon-button corner-button"
+                onClick={closeOverlay}
+              >
+                <CircleClose />
+              </button>
+            ) : (
+              <button
+                className="box-icon-button corner-button"
+                onClick={() => closeClerIsShowWps()}
+              >
+                <BoxBackIcon />
+              </button>
+            )}
             <div className="overlay-content">
               <h3>Nesting Woodpeckers</h3>
             </div>
-            {selectedNest && !isShowWps && (
-              <div className="nest-group">
-                <div className="nest-group-content">
-                  <div className="item-group">
-                    <div className="id">#{selectedNest.id}</div>
-                    <div className="label">multiplier</div>
-                    <img src={selectedNest.image} alt="" />
-                    <p className="item-dec">Tier {selectedNest.tier}</p>
-                  </div>
-                  <p className="x">X</p>
-                  <div className="item-group">
-                    <div
-                      className="multi-pre-box"
-                      onClick={() => setIsShowWps(true)}
-                    >
-                      <p className="t">
-                        Select
-                        <br />
-                        Woodpecker
-                        <br />
-                        NFT
-                      </p>
+            {!isStakingPlan ? (
+              <>
+                {selectedNest && !isShowWps && (
+                  <div className="nest-group">
+                    <div className="nest-group-content">
+                      <div className="item-group">
+                        <div className="id">#{selectedNest.id}</div>
+                        <div className="label">multiplier</div>
+                        <img src={selectedNest.image} alt="" />
+                        <p className="item-dec">Tier {selectedNest.tier}</p>
+                      </div>
+                      <p className="x">X</p>
+                      <div className="item-group">
+                        {selectedMainNfts.length === 0 ? (
+                          <div
+                            className="multi-pre-box"
+                            onClick={() => setIsShowWps(true)}
+                          >
+                            <p className="t">
+                              Select
+                              <br />
+                              Woodpecker
+                              <br />
+                              NFT
+                            </p>
+                          </div>
+                        ) : (
+                          <div
+                            className="multi-nfts"
+                            onClick={() => setIsShowWps(true)}
+                          >
+                            <img src="/img/wp-image.png" alt="" />
+                            <div className="multi-nfst-overlay">
+                              <h2>X{selectedMainNfts.length}</h2>
+                              <p>WP</p>
+                            </div>
+                          </div>
+                        )}
+                        <p className="item-dec">
+                          Max. x{maxWpCnt} Woodpecker
+                          <br />
+                          for Tier {selectedNest.tier}
+                        </p>
+                      </div>
                     </div>
-                    <p className="item-dec">
-                      Max. x{maxWpCnt} Woodpecker
-                      <br />
-                      for Tier 1
-                    </p>
+                    {selectedMainNfts.length === 0 ? (
+                      <button
+                        className="btn-action"
+                        onClick={() => closeOverlay()}
+                      >
+                        get in the nest
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-action"
+                        onClick={() => setIsStakingPlan(true)}
+                      >
+                        choose your staking plan
+                      </button>
+                    )}
                   </div>
-                </div>
-                <button className="btn-action">get in the nest</button>
-              </div>
-            )}
+                )}
 
-            {selectedNest && isShowWps && (
-              <div className="nest-group">
-                <div className="nest-box-list">
-                  {blazins &&
-                    blazins.length !== 0 &&
-                    blazins.map((item, key) => (
-                      <UnstakedCardAtNest
-                        key={key}
-                        id={item.id}
-                        handleSelect={handleSelect}
-                        mint={item.mint}
-                        name={item.name}
-                        image={item.image}
-                        selected={item.selected}
-                      />
-                    ))}
+                {selectedNest && isShowWps && (
+                  <div className="nest-group">
+                    <div className="nest-box-list">
+                      {blazins &&
+                        blazins.length !== 0 &&
+                        blazins.map((item, key) => (
+                          <UnstakedCardAtNest
+                            key={key}
+                            id={item.id}
+                            handleSelect={handleSelect}
+                            mint={item.mint}
+                            name={item.name}
+                            image={item.image}
+                            selected={item.selected}
+                          />
+                        ))}
+                    </div>
+                    <button
+                      className="btn-action"
+                      onClick={() => closeIsShowWps()}
+                    >
+                      Select Woodpecker
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="nest-plan-box">
+                <h2>Choose your Staking Plan</h2>
+                <button
+                  className="box-icon-button corner-button"
+                  onClick={() => setIsStakingPlan(false)}
+                >
+                  <CircleClose />
+                </button>
+                <div className="nest-plan-box-content">
+                  <NestPlanItem
+                    wallet={wallet}
+                    selectedNest={selectedNest}
+                    title={"Unlocked"}
+                    description={
+                      <p>
+                        You get:
+                        <br />4 $Blazin a day
+                      </p>
+                    }
+                    tier={tier}
+                    lockTime={0}
+                    selectedNfts={selectedMainNfts}
+                    updatePage={update}
+                  />
+                  <NestPlanItem
+                    wallet={wallet}
+                    selectedNest={selectedNest}
+                    title={"10 days"}
+                    description={
+                      <p>
+                        Lock in 100 $BLAZE
+                        <br />7 $BLAZE a day
+                      </p>
+                    }
+                    tier={tier}
+                    lockTime={10}
+                    selectedNfts={selectedMainNfts}
+                    updatePage={update}
+                  />
+                  <NestPlanItem
+                    wallet={wallet}
+                    selectedNest={selectedNest}
+                    title={"20 days"}
+                    description={
+                      <p>
+                        Lock in 200 $BLAZE <br />
+                        10 $BLAZE a day
+                      </p>
+                    }
+                    tier={tier}
+                    lockTime={20}
+                    selectedNfts={selectedMainNfts}
+                    updatePage={update}
+                  />
+                  <NestPlanItem
+                    wallet={wallet}
+                    selectedNest={selectedNest}
+                    title={"35 days"}
+                    description={
+                      <p>
+                        Lock in 300 $BLAZE
+                        <br />
+                        15 $BLAZE a day
+                      </p>
+                    }
+                    tier={tier}
+                    lockTime={35}
+                    selectedNfts={selectedMainNfts}
+                    updatePage={update}
+                  />
                 </div>
-                <button className="btn-action">Select Woodpecker</button>
               </div>
             )}
           </div>
         )}
-        <h3>{title}</h3>
 
         {!(isOverlay && isReady) && (
           <>
+            <h3>{title}</h3>
             {loading ? (
               <div className="nft-gallery">
                 {[1, 2, 3, 4, 5].map((item, key) => (

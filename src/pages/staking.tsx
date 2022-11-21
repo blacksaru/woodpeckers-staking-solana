@@ -14,6 +14,7 @@ import { getAllNFTs, getGlobalInfo } from "../contexts/transaction";
 import CollectionStakedBox from "../components/CollectionStakedBox";
 import RansackBox from "../components/RansackBox";
 import NestCollectionBox from "../components/NestCollectionBox";
+import NestStakedCollectionBox from "../components/NestStakedCollectionBox";
 
 export interface NFTType {
   mint: string;
@@ -217,7 +218,7 @@ const StakingPage: NextPage = () => {
               <div className="total-values">
                 <p>Rewards Distributed</p>
                 <h2 style={{ fontWeight: 400 }}>
-                  <span>{totalRewardDistributed.toLocaleString()} </span>$Blaze
+                  <span>{totalRewardDistributed.toLocaleString()} </span>$BLAZE
                 </h2>
               </div>
             </MainBox>
@@ -231,7 +232,7 @@ const StakingPage: NextPage = () => {
                 <div className="total-values">
                   <p>Live Rewards</p>
                   <h2 style={{ fontWeight: 400 }}>
-                    <span>0 </span>$Blaze
+                    <span>0 </span>$BLAZE
                   </h2>
                 </div>
               </MainBox>
@@ -239,7 +240,7 @@ const StakingPage: NextPage = () => {
                 <div className="total-values">
                   <p>Accumulated Rewards</p>
                   <h2 style={{ fontWeight: 400 }}>
-                    <span>+300.001 </span>$Blaze
+                    <span>+300.001 </span>$BLAZE
                   </h2>
                 </div>
               </MainBox>
@@ -273,6 +274,18 @@ const StakingPage: NextPage = () => {
           <NestCollectionBox
             wallet={wallet}
             title="Nest Collections"
+            wpNftList={blazins}
+            nestNftList={nests}
+            loading={loading}
+            setNfts={setNests}
+            isOverlay={isOverlay}
+            setIsOverlay={setIsOverlay}
+            updatePage={updatePage}
+          />
+
+          <NestStakedCollectionBox
+            wallet={wallet}
+            title="Nesting"
             wpNftList={blazins}
             nestNftList={nests}
             loading={loading}

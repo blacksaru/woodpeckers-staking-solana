@@ -314,11 +314,12 @@ html {
         position: relative;
         background: linear-gradient(92.79deg, #373737 0%, #2b2b2b 100%);
         border-radius: 8px;
+        border: 2px solid #10e086;
         z-index: 2;
     }
     &::before {
         margin: -2px;
-        content: "";
+        // content: "";
         position: absolute;
         left: 0;
         top: 0;
@@ -670,12 +671,12 @@ html {
 }
 
 .box-overlay {
-    position: absolute;
+    // position: absolute;
     backdrop-filter: blur(4px);
-    left: 0;
-    top: 0;
-    width: calc(100% - 64px);
-    padding: 32px;
+    // left: 0;
+    // top: 0;
+    // width: calc(100% - 64px);
+    // padding: 32px;
     border-radius: 10px;
     background: #1e1e1e;
     z-index: 100;
@@ -763,8 +764,10 @@ button {
 
 .overlay-close {
     position: absolute;
-    right: 32px;
-    top: 32px;
+    // right: 32px;
+    // top: 32px;
+    right: 0;
+    top: 0;
     border: none;
     background-color: transparent;
     z-index: 99;
@@ -1043,6 +1046,44 @@ button {
             margin-top: 16px;
             color: #ffffff;
         }
+        .multi-nfts {
+            position: relative;
+            img {
+                width: 128px;
+                height: 128px;
+                object-fit: cover;
+            }
+            .multi-nfst-overlay {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 128px;
+                height: 128px;
+                border-radius: 12px;
+                background: #1e1e1ebd;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                h2 {
+                    font-family: "Poppins";
+                    font-style: normal;
+                    font-weight: 600;
+                    font-size: 36px;
+                    line-height: 32px;
+                    color: #a5f9cf;
+                }
+                p {
+                    font-family: "Poppins";
+                    font-style: normal;
+                    font-weight: 600;
+                    font-size: 16px;
+                    line-height: 24px;
+                    text-align: center;
+                    color: #a5f9cf;
+                }
+            }
+        }
     }
     .x {
         font-family: "Archivo";
@@ -1084,4 +1125,177 @@ button {
     gap: 16px;
     margin-top: 45px;
     margin-bottom: 62px;
+}
+
+.corner-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 99;
+}
+
+.nest-plan-box {
+    margin-top: 45px;
+    padding: 32px;
+    position: relative;
+    border: 2px solid #10e086;
+    border-radius: 10px;
+    h2 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 32px;
+        line-height: 35px;
+        color: #ffffff;
+    }
+    .nest-plan-box-content {
+        display: flex;
+        margin-top: 32px;
+        gap: 14px;
+    }
+    .corner-button {
+        margin-right: 32px;
+        margin-top: 32px;
+    }
+}
+
+.simple-nft-card {
+    position: relative;
+    width: 128px;
+    text-align: center;
+    img {
+        width: 100%;
+        border-radius: 15px;
+    }
+    .id {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        font-style: normal;
+        font-weight: 400;
+        padding: 2px 6px;
+        font-size: 9px;
+        border-radius: 30px;
+        line-height: 10px;
+        color: #1e1e1e;
+        background-color: #0fdc82;
+    }
+    .label {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 400;
+        font-size: 9px;
+        line-height: 10px;
+        padding: 2px 6px;
+        border-radius: 30px;
+        color: #ffffff;
+        background-color: #1e1e1e;
+    }
+}
+
+.nest-staked-card {
+    background-color: #1e1e1e;
+    padding: 32px;
+    border-radius: 15px;
+    margin-top: 32px;
+    .staked-detail {
+        display: flex;
+        gap: 18px;
+        .multiplier {
+            width: 128px;
+            height: 128px;
+            position: relative;
+            img {
+                width: 128px;
+                height: 128px;
+                object-fit: cover;
+                border-radius: 15px;
+            }
+            .multiplier-overlay {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 128px;
+                height: 128px;
+                background-color: #1e1e1eaa;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                h2 {
+                    font-family: "Poppins";
+                    font-style: normal;
+                    font-weight: 600;
+                    font-size: 36px;
+                    line-height: 54px;
+                    display: flex;
+                    align-items: center;
+                    text-align: center;
+                    color: #0fdc82;
+                }
+                p {
+                    font-family: "Poppins";
+                    font-style: normal;
+                    font-weight: 600;
+                    font-size: 16px;
+                    line-height: 24px;
+                    text-align: center;
+                    color: #0fdc82;
+                    margin-top: -12px;
+                }
+            }
+        }
+        .detail-content {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            justify-content: flex-end;
+            .label {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 400;
+                font-size: 9px;
+                line-height: 10px;
+                text-align: center;
+                text-transform: uppercase;
+                padding: 2px 10px;
+                border-radius: 20px;
+                background-color: #0fdc82;
+                color: #1e1e1e;
+                margin-bottom: 6px;
+            }
+            h2 {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 36px;
+                line-height: 39px;
+
+                color: #ffffff;
+            }
+            .texts {
+                margin-top: 11px;
+                .text-item {
+                    display: flex;
+                    font-family: "Archivo";
+                    font-style: normal;
+                    color: #ffffff;
+                    h5 {
+                        font-weight: 700;
+                        font-size: 16px;
+                        line-height: 17px;
+                        width: 145px;
+                    }
+                    h6 {
+                        font-weight: 400;
+                        font-size: 16px;
+                        line-height: 17px;
+                    }
+                }
+            }
+        }
+    }
 }

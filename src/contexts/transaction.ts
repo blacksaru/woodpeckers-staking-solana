@@ -254,7 +254,9 @@ export const stakeNFT = async (
 export const nestToPool = async (
   wallet: WalletContextState,
   nestMint: PublicKey,
-  woodPecker: PublicKey[],
+  woodPecker: {
+    mint: PublicKey;
+  }[],
   lockTime: number,
   tier: number,
   setLoading: Function,
@@ -273,14 +275,13 @@ export const nestToPool = async (
     STAKING_PROGRAM_ID,
     provider
   );
-
-  let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
-    userAddress,
-    "user-nest-pool",
-    STAKING_PROGRAM_ID
-  );
-
   try {
+    let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
+      userAddress,
+      "user-nest-pool",
+      STAKING_PROGRAM_ID
+    );
+
     setLoading(true);
     let poolAccount = await solConnection.getAccountInfo(userPoolKey);
     if (poolAccount === null || poolAccount.data === null) {
@@ -322,7 +323,9 @@ export const nestToPool = async (
 export const ransackToPool = async (
   wallet: WalletContextState,
   nestMint: PublicKey,
-  woodPecker: PublicKey[],
+  woodPecker: {
+    mint: PublicKey;
+  }[],
   lockTime: number,
   tier: number,
   setLoading: Function,
@@ -1058,7 +1061,9 @@ export const createStakeNftTx = async (
 
 export const createNestToPoolTx = async (
   nestMint: PublicKey,
-  woodpecker: PublicKey[],
+  woodpecker: {
+    mint: PublicKey;
+  }[],
   userAddress: PublicKey,
   program: anchor.Program,
   connection: Connection,
@@ -1094,12 +1099,15 @@ export const createNestToPoolTx = async (
   for (let i = 0; i < woodpecker.length; i++) {
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
-      woodpecker[i]
+      woodpecker[i].mint
     );
     if (!(await isExistAccount(userWoodAccount, connection))) {
-      let accountOfNFT = await getNFTTokenAccount(woodpecker[i], connection);
+      let accountOfNFT = await getNFTTokenAccount(
+        woodpecker[i].mint,
+        connection
+      );
       if (userWoodAccount.toBase58() != accountOfNFT.toBase58()) {
-        let nftOwner = await getOwnerOfNFT(woodpecker[i], connection);
+        let nftOwner = await getOwnerOfNFT(woodpecker[i].mint, connection);
         if (nftOwner.toBase58() == userAddress.toBase58())
           userWoodAccount = accountOfNFT;
         else if (nftOwner.toBase58() !== globalAuthority.toBase58()) {
@@ -1109,14 +1117,14 @@ export const createNestToPoolTx = async (
     }
     console.log(
       "Woodpecker NFT = ",
-      woodpecker[i].toBase58(),
+      woodpecker[i].mint.toBase58(),
       userWoodAccount.toBase58()
     );
 
-    let woodEditionId = await Edition.getPDA(woodpecker[i]);
+    let woodEditionId = await Edition.getPDA(woodpecker[i].mint);
 
     remainingAccounts.push({
-      pubkey: woodpecker[i],
+      pubkey: woodpecker[i].mint,
       isSigner: false,
       isWritable: false,
     });
@@ -1148,10 +1156,10 @@ export const createNestToPoolTx = async (
   }
 
   const nestMetadata = await getMetadata(nestMint);
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
 
   let tx = new Transaction();
-
+  console.log(nestEditionInfo.toBase58(), "==> nestEditionInfo");
   tx.add(
     program.instruction.nestToPool(bump, tier, new anchor.BN(lockTime), {
       accounts: {
@@ -1162,7 +1170,7 @@ export const createNestToPoolTx = async (
         nestMint,
         userTokenAccount,
         destTokenAccount,
-        nestEditionId,
+        nestEditionInfo,
         nestMetadata,
         tokenProgram: TOKEN_PROGRAM_ID,
       },

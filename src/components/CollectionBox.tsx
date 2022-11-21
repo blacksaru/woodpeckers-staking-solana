@@ -76,7 +76,10 @@ export default function CollectionBox(props: {
       >
         {isOverlay && isReady && (
           <div className="box-overlay">
-            <button className="overlay-close" onClick={closeOverlay}>
+            <button
+              className="box-icon-button corner-button"
+              onClick={closeOverlay}
+            >
               <CircleClose />
             </button>
             <div className="overlay-content">
@@ -135,21 +138,24 @@ export default function CollectionBox(props: {
             </div>
           </div>
         )}
-        <h3>{title}</h3>
-        <div className="action-buttons">
-          <button
-            className="btn-action"
-            disabled={selectedNfts.length === 0}
-            onClick={() => handleIsReady("single")}
-          >
-            stake
-          </button>
-          <button className="btn-action" onClick={() => handleIsReady("all")}>
-            stake all
-          </button>
-        </div>
         {!(isOverlay && isReady) && (
           <>
+            <h3>{title}</h3>
+            <div className="action-buttons">
+              <button
+                className="btn-action"
+                disabled={selectedNfts.length === 0}
+                onClick={() => handleIsReady("single")}
+              >
+                stake
+              </button>
+              <button
+                className="btn-action"
+                onClick={() => handleIsReady("all")}
+              >
+                stake all
+              </button>
+            </div>
             {loading ? (
               <div className="nft-gallery">
                 {[1, 2, 3, 4, 5].map((item, key) => (

@@ -85,7 +85,7 @@ export default function StakedCard(props: {
         </div>
         <div className="staked-content">
           <div className="content-head">
-            <h3>0.5 $Blaze</h3>
+            <h3>0.5 $BLAZE</h3>
             <span className="reward-mark">Daily</span>
           </div>
           <div className="box">
