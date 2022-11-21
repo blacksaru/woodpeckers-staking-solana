@@ -818,7 +818,7 @@ button {
     }
     &:hover {
         .staked-overlay {
-            display: flex;
+            display: flex !important;
             align-items: center;
             flex-direction: column;
             text-align: center;
@@ -864,10 +864,51 @@ button {
                 border-radius: 15px;
                 padding: 10px;
                 transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 &:hover {
                     background-color: #2e2e2e;
                 }
             }
+        }
+    }
+}
+
+.box-title {
+    span {
+        font-family: "Poppins";
+        font-style: normal;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 30px;
+        color: #a5f9cf;
+        margin-left: 17px;
+    }
+}
+
+.ransack {
+    .select-mission {
+        border: 1px solid #0fdc82;
+        background-color: #1e1e1e;
+        border-radius: 15px;
+        max-width: 480px;
+        margin-right: auto;
+        margin-left: auto;
+        text-align: center;
+        padding: 32px 16px;
+        h4 {
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 700;
+            font-size: 20px;
+            line-height: 22px;
+            text-align: center;
+            color: #ffffff;
+        }
+        p {
+            margin-top: 16px;
+            margin-bottom: 16px;
         }
     }
 }

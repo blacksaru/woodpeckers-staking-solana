@@ -326,3 +326,9 @@ export const filterError = (error: any) => {
     errorAlert("Signature verification failed");
   }
 };
+
+export const getNetworkTime = async () => {
+  const slot = await solConnection.getSlot();
+  const blockTime = await solConnection.getBlockTime(slot);
+  return blockTime ? blockTime : (new Date().getTime() / 1000).toFixed();
+};

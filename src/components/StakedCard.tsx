@@ -1,8 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { CheckIcon } from "./svgIcons";
 import EndTimeCountdown from "./EndTimeCountdown";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import { claimReward } from "../contexts/transaction";
+import { PublicKey } from "@solana/web3.js";
+import { ClipLoader } from "react-spinners";
+import { getNetworkTime } from "../contexts/utils";
 
 export default function StakedCard(props: {
   wallet: WalletContextState;
@@ -11,6 +15,7 @@ export default function StakedCard(props: {
   lockTime: number;
   lockLength: number;
   mint: string;
+  updatePage: Function;
   uri?: string;
   name?: string;
   image?: string;
@@ -28,16 +33,43 @@ export default function StakedCard(props: {
     handleSelect,
     mint,
     lockLength,
+    updatePage,
   } = props;
+
+  const [loading, setLoading] = useState(false);
+  const [now, setNow] = useState(new Date().getTime());
+
+  const handleCollect = async () => {
+    const now = (await getNetworkTime()) as number;
+    setNow(now);
+    try {
+      await claimReward(wallet, setLoading, updatePage, new PublicKey(mint));
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div
       className="staked-card"
       style={{ pointerEvents: lockLength === 0 ? "all" : "none" }}
     >
-      <div className="staked-overlay">
+      <div
+        className="staked-overlay"
+        style={{ display: loading ? "flex !important" : "none" }}
+      >
         <div className="mark">ended</div>
         <img src="/img/genesis-hover.svg" alt="" />
-        <button className="overlay-collect">Collect Rewards</button>
+        <button
+          className="overlay-collect"
+          disabled={loading}
+          onClick={() => handleCollect()}
+        >
+          {loading ? (
+            <ClipLoader size={10} color="#fff" />
+          ) : (
+            <>Collect Rewards</>
+          )}
+        </button>
       </div>
       <div className="nft-card" onClick={() => handleSelect(mint)}>
         <div className="nft-id">#{id}</div>
@@ -59,8 +91,8 @@ export default function StakedCard(props: {
           <div className="box">
             {lockLength === 0 ? (
               <h4>No Timer</h4>
-            ) : lockTime * 1000 < new Date().getTime() ? (
-              <h4>End Ended</h4>
+            ) : lockTime < now ? (
+              <h4>Time Ended</h4>
             ) : (
               <h4>Time Left</h4>
             )}

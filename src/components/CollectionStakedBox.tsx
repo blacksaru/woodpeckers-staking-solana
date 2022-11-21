@@ -124,6 +124,7 @@ export default function CollectionStakedBox(props: {
                           image={item.image}
                           selected={item.selected}
                           handleSelect={handleSelect}
+                          updatePage={updatePage}
                         />
                       )
                   )}

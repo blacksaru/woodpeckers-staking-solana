@@ -6,12 +6,13 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import MainBox from "../components/MainBox";
-import { solConnection } from "../contexts/utils";
+import { getNetworkTime, solConnection } from "../contexts/utils";
 import { CREATOR_ADDRESS_BLAZIN, CREATOR_ADDRESS_NEST, EPOCH } from "../config";
 import CollectionBox from "../components/CollectionBox";
 import Header from "../components/Header";
 import { getAllNFTs, getGlobalInfo } from "../contexts/transaction";
 import CollectionStakedBox from "../components/CollectionStakedBox";
+import RansackBox from "../components/RansackBox";
 
 export interface NFTType {
   mint: string;
@@ -47,6 +48,7 @@ const StakingPage: NextPage = () => {
       return;
     }
     setLoading(true);
+    const now = await getNetworkTime();
     let nfts: NFTType[] = [];
     const stakedNfts = await getAllNFTs();
     let userNfts: any = [];
@@ -68,6 +70,9 @@ const StakingPage: NextPage = () => {
         item.data.creators &&
         item.data.creators[0].address === CREATOR_ADDRESS_BLAZIN
       ) {
+        const filtered = userNfts.filter(
+          (nft: any) => nft.mint === item.mint
+        )[0];
         blazinList.push({
           mint: item.mint,
           id: item.data.name.split("#")[1],
@@ -76,32 +81,24 @@ const StakingPage: NextPage = () => {
           name: item.data.name,
           selected: false,
           tier: "0",
-          staked: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? true
-            : false,
+          staked: filtered ? true : false,
           isMulti: false,
-          stakedTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                .stakedTime
-            : new Date().getTime() / 1000,
-          lockTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].lockTime
-            : new Date().getTime() / 1000,
-          claimable: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].claimable
-            : 0,
-          lockLength: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? (userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                .lockTime -
-                userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                  .stakedTime) /
-              EPOCH
+          stakedTime: filtered ? filtered.stakedTime : now,
+          lockTime: filtered ? filtered.lockTime : now,
+          claimable: filtered ? filtered.claimable : 0,
+          lockLength: filtered
+            ? (filtered.lockTime - filtered.stakedTime > 0
+                ? filtered.lockTime - filtered.stakedTime
+                : 0) / EPOCH
             : 0,
         });
       } else if (
         item.data.creators &&
         item.data.creators[0].address === CREATOR_ADDRESS_NEST
       ) {
+        const filtered = userNfts.filter(
+          (nft: any) => nft.mint === item.mint
+        )[0];
         nestsList.push({
           mint: item.mint,
           id: item.data.name.split("#")[1],
@@ -110,26 +107,15 @@ const StakingPage: NextPage = () => {
           name: item.data.name,
           selected: false,
           tier: "0",
-          staked: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? true
-            : false,
+          staked: filtered ? true : false,
           isMulti: false,
-          stakedTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                .stakedTime
-            : new Date().getTime() / 1000,
-          lockTime: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].lockTime
-            : new Date().getTime() / 1000,
-          claimable: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? userNfts.filter((nft: any) => nft.mint === item.mint)[0].claimable
-            : 0,
-          lockLength: userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-            ? (userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                .lockTime -
-                userNfts.filter((nft: any) => nft.mint === item.mint)[0]
-                  .stakedTime) /
-              EPOCH
+          stakedTime: filtered ? filtered.stakedTime : now,
+          lockTime: filtered ? filtered.lockTime : now,
+          claimable: filtered ? filtered.claimable : 0,
+          lockLength: filtered
+            ? (filtered.lockTime - filtered.stakedTime > 0
+                ? filtered.lockTime - filtered.stakedTime
+                : 0) / EPOCH
             : 0,
         });
       }
@@ -288,6 +274,7 @@ const StakingPage: NextPage = () => {
             updatePage={updatePage}
           />
           {isOverlay && <div className="overlay-back"></div>}
+          <RansackBox />
         </div>
       </main>
     </>
