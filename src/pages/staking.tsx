@@ -13,6 +13,7 @@ import Header from "../components/Header";
 import { getAllNFTs, getGlobalInfo } from "../contexts/transaction";
 import CollectionStakedBox from "../components/CollectionStakedBox";
 import RansackBox from "../components/RansackBox";
+import NestCollectionBox from "../components/NestCollectionBox";
 
 export interface NFTType {
   mint: string;
@@ -139,30 +140,36 @@ const StakingPage: NextPage = () => {
           })
       )
     );
-    let nestMetaList: { image: string; name: string }[] = await Promise.all(
-      nestsList.map((nft) =>
-        fetch(nft.uri)
-          .then((resp) => resp.json())
-          .then((json) => {
-            return {
-              image: json.image as string,
-              name: json.name as string,
-            };
-          })
-          .catch((error) => {
-            console.log(error);
-            return {
-              image: "",
-              name: "",
-            };
-          })
-      )
-    );
+    let nestMetaList: { image: string; name: string; tier: string }[] =
+      await Promise.all(
+        nestsList.map((nft) =>
+          fetch(nft.uri)
+            .then((resp) => resp.json())
+            .then((json) => {
+              return {
+                image: json.image as string,
+                name: json.name as string,
+                tier: json.attributes.filter(
+                  (item: any) => item.trait_type.toLowerCase() === "tier"
+                )[0].value,
+              };
+            })
+            .catch((error) => {
+              console.log(error);
+              return {
+                image: "",
+                name: "",
+                tier: "0",
+              };
+            })
+        )
+      );
     for (let i = 0; i < blazinList.length; i++) {
       blazinList[i].image = blazinMetaList[i].image;
     }
     for (let i = 0; i < nestsList.length; i++) {
       nestsList[i].image = nestMetaList[i].image;
+      nestsList[i].tier = nestMetaList[i].tier;
     }
     console.log("blazinList =>", blazinList);
     console.log("nestsList =>", nestsList);
@@ -263,10 +270,11 @@ const StakingPage: NextPage = () => {
             />
           )}
 
-          <CollectionBox
+          <NestCollectionBox
             wallet={wallet}
             title="Nest Collections"
-            nftList={nests}
+            wpNftList={blazins}
+            nestNftList={nests}
             loading={loading}
             setNfts={setNests}
             isOverlay={isOverlay}
@@ -274,7 +282,7 @@ const StakingPage: NextPage = () => {
             updatePage={updatePage}
           />
           {isOverlay && <div className="overlay-back"></div>}
-          <RansackBox />
+          <RansackBox isOverlay={isOverlay} setIsOverlay={setIsOverlay} />
         </div>
       </main>
     </>

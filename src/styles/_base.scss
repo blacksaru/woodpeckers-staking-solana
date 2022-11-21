@@ -652,6 +652,10 @@ html {
     margin-right: auto;
     margin-left: auto;
     margin-top: 80px;
+    @media (max-width: 1228px) {
+        margin-right: 24px;
+        margin-left: 24px;
+    }
     .footer-content {
         font-family: "Poppins";
         font-style: normal;
@@ -688,7 +692,7 @@ html {
     background-color: #00000054;
     height: 100vh;
     width: 100%;
-    z-index: 2;
+    z-index: 4;
     backdrop-filter: blur(5px);
 }
 button {
@@ -895,6 +899,7 @@ button {
         max-width: 480px;
         margin-right: auto;
         margin-left: auto;
+        margin-top: 24px;
         text-align: center;
         padding: 32px 16px;
         h4 {
@@ -909,6 +914,174 @@ button {
         p {
             margin-top: 16px;
             margin-bottom: 16px;
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 17px;
+            text-align: center;
+
+            color: #ffffff;
         }
     }
+    .mission-box {
+        display: flex;
+        gap: 15px;
+        margin-top: 24px;
+        position: relative;
+        .back-btn {
+            position: absolute;
+            right: 0;
+            top: -60px;
+        }
+        .mission-item {
+            background-color: #1e1e1e;
+            border: 1px solid #0fdc82;
+            border-radius: 15px;
+            text-align: center;
+            padding: 32px 16px;
+            width: calc(25% - 8px);
+            font-family: "Archivo";
+            font-style: normal;
+            h5 {
+                font-weight: 700;
+                font-size: 20px;
+                line-height: 22px;
+                text-align: center;
+                margin-bottom: 8px;
+                color: #ffffff;
+            }
+            h4 {
+                font-weight: 700;
+                font-size: 32px;
+                line-height: 35px;
+                text-align: center;
+                color: #ffffff;
+                margin-bottom: 20px;
+            }
+        }
+    }
+}
+
+.box-icon-button {
+    border: none;
+    background: #a5f9cf;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    &:hover {
+        background-color: #0fdc82;
+    }
+}
+
+.nest-unstaked-card {
+    .selected {
+        display: none;
+    }
+    &:hover {
+        .selected {
+            display: flex;
+        }
+    }
+}
+
+.nest-group {
+    text-align: center;
+    .nest-group-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        margin-top: 45px;
+    }
+    .item-group {
+        position: relative;
+        width: 128px;
+        text-align: center;
+        img {
+            width: 100%;
+            border-radius: 15px;
+        }
+        .id {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-style: normal;
+            font-weight: 400;
+            padding: 2px 6px;
+            font-size: 9px;
+            border-radius: 30px;
+            line-height: 10px;
+            color: #1e1e1e;
+            background-color: #0fdc82;
+        }
+        .label {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 400;
+            font-size: 9px;
+            line-height: 10px;
+            padding: 2px 6px;
+            border-radius: 30px;
+            color: #ffffff;
+            background-color: #1e1e1e;
+        }
+        p.item-dec {
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 400;
+            font-size: 10px;
+            line-height: 11px;
+            text-align: center;
+            margin-top: 16px;
+            color: #ffffff;
+        }
+    }
+    .x {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 36px;
+        line-height: 39px;
+        color: #ffffff;
+        margin: 44px 46px auto 46px;
+    }
+}
+
+.multi-pre-box {
+    width: 126px;
+    height: 126px;
+    border-radius: 15px;
+    border: 1px solid #0fdc82;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover {
+        background: #0fdc822b;
+        cursor: pointer;
+    }
+    p.t {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 17px;
+        text-align: center;
+        color: #ffffff;
+    }
+}
+
+.nest-box-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 45px;
+    margin-bottom: 62px;
 }
