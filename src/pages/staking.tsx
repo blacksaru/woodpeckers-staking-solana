@@ -294,8 +294,13 @@ const StakingPage: NextPage = () => {
             setIsOverlay={setIsOverlay}
             updatePage={updatePage}
           />
+          <RansackBox
+            isOverlay={isOverlay}
+            setIsOverlay={setIsOverlay}
+            wpNfts={blazins}
+            nestNfts={nests}
+          />
           {isOverlay && <div className="overlay-back"></div>}
-          <RansackBox isOverlay={isOverlay} setIsOverlay={setIsOverlay} />
         </div>
       </main>
     </>

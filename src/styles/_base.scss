@@ -1085,17 +1085,17 @@ button {
             }
         }
     }
-    .x {
-        font-family: "Archivo";
-        font-style: normal;
-        font-weight: 700;
-        font-size: 36px;
-        line-height: 39px;
-        color: #ffffff;
-        margin: 44px 46px auto 46px;
-    }
 }
 
+.x {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 39px;
+    color: #ffffff;
+    margin: 44px 46px auto 46px;
+}
 .multi-pre-box {
     width: 126px;
     height: 126px;
@@ -1161,6 +1161,7 @@ button {
 
 .simple-nft-card {
     position: relative;
+    cursor: pointer;
     width: 128px;
     text-align: center;
     img {
@@ -1201,6 +1202,10 @@ button {
     padding: 32px;
     border-radius: 15px;
     margin-top: 32px;
+    .content-top {
+        display: flex;
+        justify-content: space-between;
+    }
     .staked-detail {
         display: flex;
         gap: 18px;
@@ -1297,5 +1302,339 @@ button {
                 }
             }
         }
+        .detail-content {
+            display: flex;
+            flex-direction: column;
+            align-items: start;
+            justify-content: flex-end;
+            .label {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 400;
+                font-size: 9px;
+                line-height: 10px;
+                text-align: center;
+                text-transform: uppercase;
+                padding: 2px 10px;
+                border-radius: 20px;
+                background-color: #0fdc82;
+                color: #1e1e1e;
+                margin-bottom: 6px;
+            }
+            h2 {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 36px;
+                line-height: 39px;
+
+                color: #ffffff;
+            }
+            .texts {
+                margin-top: 11px;
+                .text-item {
+                    display: flex;
+                    font-family: "Archivo";
+                    font-style: normal;
+                    color: #ffffff;
+                    h5 {
+                        font-weight: 700;
+                        font-size: 16px;
+                        line-height: 17px;
+                        width: 145px;
+                    }
+                    h6 {
+                        font-weight: 400;
+                        font-size: 16px;
+                        line-height: 17px;
+                    }
+                }
+            }
+        }
     }
+    .content {
+        .staked-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+    }
+    .detail-right {
+        border: 1px solid #0fdc82;
+        border-radius: 15px;
+        padding: 24px 10px;
+        display: flex;
+        .l {
+            text-align: center;
+            width: 108px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #0fdc82;
+            .label {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 400;
+                font-size: 9px;
+                line-height: 10px;
+                text-align: center;
+                text-transform: uppercase;
+                padding: 2px 10px;
+                border-radius: 20px;
+                background-color: #0fdc82;
+                color: #1e1e1e;
+                margin-bottom: 6px;
+            }
+            h2 {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 40px;
+                line-height: 44px;
+                text-align: center;
+                color: #ffffff;
+            }
+        }
+        .r {
+            text-align: center;
+            width: 148px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            h5 {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 14px;
+                line-height: 15px;
+                text-align: center;
+            }
+            p {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 20px;
+                line-height: 22px;
+                text-align: center;
+                margin-top: 16px;
+                color: #ffffff;
+            }
+        }
+    }
+}
+
+.staking-progressbar {
+    display: flex;
+    align-items: flex-end;
+    margin-top: 40px;
+    h4 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 14px;
+        line-height: 15px;
+        color: #ffffff;
+        width: 70px;
+        margin-right: 30px;
+    }
+    .countdown {
+        width: 140px;
+        margin-right: 50px;
+    }
+    .progress-bar {
+        width: 384px;
+    }
+}
+
+.ransack-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 32px;
+    .ransack-empty-content {
+        border-radius: 15px;
+        border: 1px solid #0fdc82;
+        background: #1e1e1e;
+        text-align: center;
+        padding: 32px 60px;
+        position: relative;
+        .back-btn {
+            position: absolute;
+            right: 32px;
+            top: 32px;
+        }
+    }
+    h6 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 20px;
+        line-height: 22px;
+        text-align: center;
+
+        color: #ffffff;
+    }
+    h2 {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 36px;
+        line-height: 39px;
+        text-align: center;
+
+        color: #ffffff;
+    }
+    p.d {
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 17px;
+        text-align: center;
+        margin-top: 16px;
+        color: #ffffff;
+    }
+    .double-group {
+        display: flex;
+        margin-top: 40px;
+        .one-item {
+            img {
+                width: 128px;
+                height: 128px;
+                border-radius: 15px;
+            }
+            .multi-nfts {
+                width: 128px;
+                height: 128px;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 15px;
+                }
+            }
+            .empty-box {
+                width: 126px;
+                height: 126px;
+                border: 1px solid #0fdc82;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                &:hover {
+                    background-color: #a5f9cf28;
+                }
+                p {
+                    font-family: "Archivo";
+                    font-style: normal;
+                    font-weight: 700;
+                    font-size: 16px;
+                    line-height: 17px;
+                    text-align: center;
+
+                    color: #ffffff;
+                }
+            }
+            h4 {
+                margin-top: 22px;
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 700;
+                font-size: 24px;
+                line-height: 26px;
+                text-align: center;
+                color: #ffffff;
+                border-bottom: 1px solid #0fdc82;
+                padding-bottom: 12px;
+                margin-bottom: 12px;
+            }
+            p {
+                font-family: "Archivo";
+                font-style: normal;
+                font-weight: 400;
+                font-size: 10px;
+                line-height: 11px;
+                text-align: center;
+                color: #ffffff;
+            }
+        }
+    }
+    h3 {
+        margin-top: 35px;
+        margin-bottom: 24px;
+        font-family: "Archivo";
+        font-style: normal;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 17px;
+        text-align: center;
+        span {
+            font-weight: 400;
+        }
+    }
+}
+.start-mission {
+    font-family: "Archivo";
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 20px;
+    border: 1px solid #0fdc82;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    padding: 10px 30px;
+    border-radius: 15px;
+}
+
+.ransack-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 32px;
+    z-index: 99;
+    width: calc(100% - 64px);
+}
+
+.selectable-nft-box {
+    margin: 32px 0;
+    border: 1px solid #0fdc82;
+    padding: 24px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    position: relative;
+    .corner-button {
+        margin-right: 24px;
+        margin-top: 24px;
+    }
+    .select-nft {
+        text-align: center;
+        button {
+            font-family: "Archivo";
+            font-style: normal;
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 17px;
+            color: #ffffff;
+            padding: 8px 20px;
+            border: 1px solid #0fdc82;
+            background-color: transparent;
+            border-radius: 30px;
+            transition: all 0.3s;
+            &:hover {
+                background-color: #0fdc82;
+                color: #1e1e1e;
+            }
+        }
+    }
+}
+.ransack-nft-modal {
+    margin-top: 32px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
 }

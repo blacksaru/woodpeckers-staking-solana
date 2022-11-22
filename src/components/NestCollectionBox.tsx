@@ -352,6 +352,7 @@ export default function NestCollectionBox(props: {
                         <NestUnstakedCard
                           id={item.id}
                           nft={item}
+                          title="Nest"
                           mint={item.mint}
                           uri={item.uri}
                           key={key}

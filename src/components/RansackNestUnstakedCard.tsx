@@ -3,18 +3,16 @@ import React, { useEffect } from "react";
 import { NFTType } from "../pages/staking";
 import { CheckIcon } from "./svgIcons";
 
-export default function NestUnstakedCard(props: {
+export default function RansackNestUnstakedCard(props: {
   id: string;
   mint: string;
   nft: NFTType;
   title: string;
-  showSelectBox: Function;
   setSelectedNest: Function;
-  setIsShowWps: Function;
+  handleNestSelect: Function;
   uri?: string;
   name?: string;
   image?: string;
-  selected?: boolean;
   isNest?: boolean;
 }) {
   const {
@@ -23,23 +21,20 @@ export default function NestUnstakedCard(props: {
     title,
     image,
     nft,
-    selected,
     isNest,
     mint,
-    showSelectBox,
-    setIsShowWps,
     setSelectedNest,
+    handleNestSelect,
   } = props;
 
   const setSelect = () => {
-    showSelectBox();
     setSelectedNest(nft);
   };
 
   return (
     <div
       className="nft-card unstaked-card nest-unstaked-card"
-      onClick={() => setSelect()}
+      onClick={() => handleNestSelect()}
     >
       <div className="nft-id">#{id}</div>
       <div className="nft-image">
