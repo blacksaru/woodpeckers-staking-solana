@@ -132,16 +132,17 @@ export default function NestStakedCollectionBox(props: {
                 (item, key) =>
                   !item.staked && (
                     <NestStakedCard
-                    // id={item.id}
-                    // nft={item}
-                    // mint={item.mint}
-                    // uri={item.uri}
-                    // key={key}
-                    // image={item.image}
-                    // selected={item.selected}
-                    // showSelectBox={showSelectBox}
-                    // setSelectedNest={setSelectedNest}
-                    // setIsShowWps={setIsShowWps}
+                      key={key}
+                      // id={item.id}
+                      // nft={item}
+                      // mint={item.mint}
+                      // uri={item.uri}
+                      // key={key}
+                      // image={item.image}
+                      // selected={item.selected}
+                      // showSelectBox={showSelectBox}
+                      // setSelectedNest={setSelectedNest}
+                      // setIsShowWps={setIsShowWps}
                     />
                   )
               )}

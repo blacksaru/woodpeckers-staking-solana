@@ -15,6 +15,7 @@ import CollectionStakedBox from "../components/CollectionStakedBox";
 import RansackBox from "../components/RansackBox";
 import NestCollectionBox from "../components/NestCollectionBox";
 import NestStakedCollectionBox from "../components/NestStakedCollectionBox";
+import RansackStakedBox from "../components/RansackStakedBox";
 
 export interface NFTType {
   mint: string;
@@ -294,8 +295,23 @@ const StakingPage: NextPage = () => {
             setIsOverlay={setIsOverlay}
             updatePage={updatePage}
           />
+          <RansackBox
+            wallet={wallet}
+            isOverlay={isOverlay}
+            setIsOverlay={setIsOverlay}
+            wpNfts={blazins}
+            nestNfts={nests}
+            updatePage={updatePage}
+          />
+          <RansackStakedBox
+            wallet={wallet}
+            isOverlay={isOverlay}
+            setIsOverlay={setIsOverlay}
+            wpNfts={blazins}
+            nestNfts={nests}
+            updatePage={updatePage}
+          />
           {isOverlay && <div className="overlay-back"></div>}
-          <RansackBox isOverlay={isOverlay} setIsOverlay={setIsOverlay} />
         </div>
       </main>
     </>
