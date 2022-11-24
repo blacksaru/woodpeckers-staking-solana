@@ -343,8 +343,6 @@ const StakingPage: NextPage = () => {
       nestsList[i].image = nestMetaList[i].image;
       nestsList[i].tier = nestMetaList[i].tier;
     }
-    console.log("blazinList =>", blazinList);
-    console.log("nestsList =>", nestsList);
     setBlazins(blazinList);
     setNests(nestsList);
     setLoading(false);

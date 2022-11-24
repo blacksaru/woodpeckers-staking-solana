@@ -855,8 +855,8 @@ button {
             }
             img {
                 width: 54px;
-                margin-top: 32px;
-                margin-bottom: 32px;
+                margin-top: 15px;
+                margin-bottom: 15px;
             }
             button.overlay-collect {
                 cursor: pointer;
@@ -880,6 +880,33 @@ button {
                 }
             }
         }
+    }
+    &.ended-card {
+        background-color: #0fdc82;
+        .staked-content {
+            .content-head {
+                h3 {
+                    color: #1e1e1e;
+                }
+                .reward-mark {
+                    color: #1e1e1e;
+                }
+            }
+            .box {
+                h4 {
+                    color: #1e1e1e;
+                }
+            }
+        }
+        .countdown {
+            * {
+                color: #1e1e1e;
+            }
+        }
+    }
+    &.nested-card {
+        pointer-events: none !important;
+        background-color: #e6c30f;
     }
 }
 

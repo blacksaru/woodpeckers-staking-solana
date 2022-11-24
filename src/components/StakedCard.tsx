@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { CheckIcon } from "./svgIcons";
 import EndTimeCountdown from "./EndTimeCountdown";
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import { claimReward } from "../contexts/transaction";
+import { claimReward, withdrawNft } from "../contexts/transaction";
 import { PublicKey } from "@solana/web3.js";
 import { ClipLoader } from "react-spinners";
 import { getNetworkTime } from "../contexts/utils";
@@ -18,6 +18,7 @@ export default function StakedCard(props: {
   lockLength: number;
   mint: string;
   updatePage: Function;
+  nested: boolean;
   uri?: string;
   name?: string;
   image?: string;
@@ -32,7 +33,7 @@ export default function StakedCard(props: {
     image,
     selected,
     lockTime,
-    isNest,
+    nested,
     handleSelect,
     mint,
     lockLength,
@@ -40,21 +41,50 @@ export default function StakedCard(props: {
   } = props;
 
   const [loading, setLoading] = useState(false);
+  const [unstakeLoading, setUnstakeLoading] = useState(false);
   const [now, setNow] = useState(new Date().getTime());
   const handleCollect = async () => {
-    const now = (await getNetworkTime()) as number;
-    setNow(now);
     try {
       await claimReward(wallet, setLoading, updatePage, new PublicKey(mint));
     } catch (error) {
       console.log(error);
     }
   };
+
+  const handleUnstake = async () => {
+    try {
+      await withdrawNft(
+        wallet,
+        [{ mint: new PublicKey(mint) }],
+        setUnstakeLoading,
+        () => updatePage()
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getNowTime = async () => {
+    const now = (await getNetworkTime()) as number;
+    setNow(now);
+  };
+
+  useEffect(() => {
+    getNowTime();
+  }, []);
+
   return (
     <div
-      className="staked-card"
+      className={`staked-card ${lockTime < now ? "ended-card" : ""} ${
+        nested ? "nested-card" : ""
+      }`}
       style={{
-        pointerEvents: lockLength === 0 && !nft.nested ? "all" : "none",
+        pointerEvents:
+          lockLength === 0 && !nft.nested
+            ? "all"
+            : lockTime < now
+            ? "all"
+            : "none",
       }}
     >
       <div
@@ -72,6 +102,18 @@ export default function StakedCard(props: {
             <ClipLoader size={10} color="#fff" />
           ) : (
             <>Collect Rewards</>
+          )}
+        </button>{" "}
+        <button
+          className="overlay-collect"
+          disabled={unstakeLoading}
+          onClick={() => handleUnstake()}
+          style={{ marginTop: 10 }}
+        >
+          {unstakeLoading ? (
+            <ClipLoader size={10} color="#fff" />
+          ) : (
+            <>Unstake</>
           )}
         </button>
       </div>

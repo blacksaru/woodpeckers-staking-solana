@@ -17,15 +17,31 @@ export default function RansackPlanItem(props: {
     mint: PublicKey;
   }[];
 }) {
+  const {
+    wallet,
+    title,
+    description,
+    lockTime,
+    updatePage,
+    selectedNest,
+    setPlanId,
+    setEndProgress,
+    selectedWpNfts,
+  } = props;
   const [loading, setLoading] = useState(false);
+
+  const update = () => {
+    updatePage();
+  };
+
   const handleStake = async () => {
-    props.setPlanId();
-    props.setEndProgress(true);
+    setPlanId();
+    setEndProgress(true);
   };
   return (
     <div className="plan-item">
-      <h4>{props.title}</h4>
-      {props.description}
+      <h4>{title}</h4>
+      {description}
       <button onClick={() => handleStake()} disabled={loading}>
         {loading ? <ClipLoader size={10} color="#fff" /> : <>Select Plan</>}
       </button>

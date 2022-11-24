@@ -1,11 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { withdrawNestNft } from "../contexts/transaction";
+import { claimNestReward, withdrawNestNft } from "../contexts/transaction";
 import { NFTType } from "../pages/staking";
 import NestEndTimeCountdown from "./NestEndTimeCountdown";
 import { ClipLoader } from "react-spinners";
+import { getNetworkTime } from "../contexts/utils";
+import { infoAlert } from "./toastGroup";
+import { EPOCH } from "../contexts/type";
 
 export default function NestStakedCard(props: {
   nest: NFTType;
@@ -29,6 +32,14 @@ export default function NestStakedCard(props: {
   } = props;
 
   const [loading, setLoading] = useState(false);
+  const [claimLoading, setClaimLoading] = useState(false);
+
+  const [now, setNow] = useState(new Date().getTime());
+  const [plan, setPlan] = useState(0);
+  const update = () => {
+    updatePage();
+    infoAlert("Updating page data...");
+  };
 
   const unstake = async () => {
     try {
@@ -42,6 +53,32 @@ export default function NestStakedCard(props: {
       console.log(error);
     }
   };
+
+  const handleClaim = async () => {
+    try {
+      await claimNestReward(
+        wallet,
+        setClaimLoading,
+        updatePage,
+        new PublicKey(nest.mint)
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getNowTime = async () => {
+    const now = (await getNetworkTime()) as number;
+    setNow(now);
+  };
+
+  useEffect(() => {
+    getNowTime();
+    if (nest) {
+      const duration = (nest.stakedTime - nest.lockTime) / EPOCH;
+      setPlan(duration);
+    }
+  }, [wpNfts, nest]);
 
   return (
     <div className="nest-staked-card">
@@ -57,7 +94,7 @@ export default function NestStakedCard(props: {
               <div className="multiplier">
                 <img src={"/img/wp-image.png"} alt="" />
                 <div className="multiplier-overlay">
-                  <h2>X{1}</h2>
+                  <h2>X{wpNfts.length}</h2>
                   <p>Staked</p>
                 </div>
               </div>
@@ -67,11 +104,11 @@ export default function NestStakedCard(props: {
                 <div className="texts">
                   <div className="text-item">
                     <h5>Nest</h5>
-                    <h6>Tier 1</h6>
+                    <h6>Tier {nest.tier}</h6>
                   </div>
                   <div className="text-item">
                     <h5>Woodpeckers</h5>
-                    <h6>2</h6>
+                    <h6>{wpNfts.length}</h6>
                   </div>
                   <div className="text-item">
                     <h5>$BLAZE x day</h5>
@@ -87,16 +124,20 @@ export default function NestStakedCard(props: {
               </div>
               <div className="r">
                 <h5>Rewards</h5>
-                <p>100 $BLAZE</p>
+                <p>{100 * emission} $BLAZE</p>
               </div>
             </div>
           </div>
           <div className="staked-action">
             <div className="staking-progressbar">
-              <h4>Time Left</h4>
+              {plan === 0 ? (
+                <h4>No Timer</h4>
+              ) : (
+                <>{lockTime < now ? <h4>Time Ended</h4> : <h4>Time Left</h4>}</>
+              )}
               <NestEndTimeCountdown
-                endAction={() => console.log(0)}
-                endTime={new Date("2022-12-12")}
+                endAction={() => update()}
+                endTime={new Date(lockTime * 1000)}
                 duration={35}
               />
             </div>
@@ -104,7 +145,13 @@ export default function NestStakedCard(props: {
               <button className="btn-action" onClick={() => unstake()}>
                 {loading ? <ClipLoader size={10} color="#fff" /> : <>unstake</>}
               </button>
-              <button className="btn-action">claim</button>
+              <button className="btn-action" onClick={() => handleClaim()}>
+                {claimLoading ? (
+                  <ClipLoader size={10} color="#fff" />
+                ) : (
+                  <>claim</>
+                )}
+              </button>
             </div>
           </div>
         </div>

@@ -87,12 +87,16 @@ export default function NestStakedCollectionBox(props: {
       }
     }
     setNestedNfts(list);
+    setForceRender(!forceRender);
   };
 
   useEffect(() => {
     getNestedNfts();
+    if (wallet.publicKey === null) {
+      setNestedNfts([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.publicKey, wallet.connected]);
+  }, [wallet.publicKey, wallet.connected, wpNftList, nestNftList]);
 
   return (
     <div
