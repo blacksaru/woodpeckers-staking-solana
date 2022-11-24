@@ -229,17 +229,20 @@ export default function NestCollectionBox(props: {
                     <div className="nest-box-list">
                       {blazins &&
                         blazins.length !== 0 &&
-                        blazins.map((item, key) => (
-                          <UnstakedCardAtNest
-                            key={key}
-                            id={item.id}
-                            handleSelect={handleSelect}
-                            mint={item.mint}
-                            name={item.name}
-                            image={item.image}
-                            selected={item.selected}
-                          />
-                        ))}
+                        blazins.map(
+                          (item, key) =>
+                            !item.staked && (
+                              <UnstakedCardAtNest
+                                key={key}
+                                id={item.id}
+                                handleSelect={handleSelect}
+                                mint={item.mint}
+                                name={item.name}
+                                image={item.image}
+                                selected={item.selected}
+                              />
+                            )
+                        )}
                     </div>
                     <button
                       className="btn-action"

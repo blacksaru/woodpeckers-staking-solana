@@ -15,7 +15,7 @@ export const WOOD_TOKEN_MINT = new PublicKey(
 );
 export const WOOD_TOKEN_DECIMAL = 1_000_000_000;
 
-export const EPOCH = 120;
+export const EPOCH = 100;
 export const LOCKING_PERIOD = 60;
 export const USER_POOL_SIZE = 5656; // 8 + 5648
 export const USER_DUAL_POOL_SIZE = 32056; // 8 + 32048

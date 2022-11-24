@@ -7,15 +7,20 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import MainBox from "../components/MainBox";
 import { getNetworkTime, solConnection } from "../contexts/utils";
-import { CREATOR_ADDRESS_BLAZIN, CREATOR_ADDRESS_NEST, EPOCH } from "../config";
+import { CREATOR_ADDRESS_BLAZIN, CREATOR_ADDRESS_NEST } from "../config";
 import CollectionBox from "../components/CollectionBox";
 import Header from "../components/Header";
-import { getAllNFTs, getGlobalInfo } from "../contexts/transaction";
+import {
+  getAllNFTs,
+  getGlobalInfo,
+  getNestPoolState,
+} from "../contexts/transaction";
 import CollectionStakedBox from "../components/CollectionStakedBox";
 import RansackBox from "../components/RansackBox";
 import NestCollectionBox from "../components/NestCollectionBox";
 import NestStakedCollectionBox from "../components/NestStakedCollectionBox";
 import RansackStakedBox from "../components/RansackStakedBox";
+import { EPOCH } from "../contexts/type";
 
 export interface NFTType {
   mint: string;
@@ -31,6 +36,8 @@ export interface NFTType {
   lockTime: number;
   lockLength: number;
   claimable: number;
+  nested: boolean;
+  ransacked: boolean;
 }
 
 const StakingPage: NextPage = () => {
@@ -52,15 +59,45 @@ const StakingPage: NextPage = () => {
     }
     setLoading(true);
     const now = await getNetworkTime();
-    let nfts: NFTType[] = [];
     const stakedNfts = await getAllNFTs();
+    console.log(stakedNfts);
     let userNfts: any = [];
     if (stakedNfts && stakedNfts.count !== 0 && stakedNfts.data) {
       userNfts = stakedNfts.data.filter(
         (user) => user.owner === wallet.publicKey?.toBase58()
-      )[0].staking;
+      )[0];
+      if (userNfts) {
+        userNfts = userNfts.staking;
+      }
     }
-    console.log(stakedNfts, "==> staked nfts");
+    const nestedState = await getNestPoolState(wallet.publicKey);
+    console.log(nestedState, "==> nestedState staked nfts");
+
+    let nestedWps: {
+      claimable: number;
+      emission: number;
+      lockTime: number;
+      nest: string;
+      stakedTime: number;
+      mint: string;
+    }[] = [];
+
+    if (nestedState) {
+      const stakedCount = nestedState.stakedCount.toNumber();
+      for (let i = 0; i < stakedCount; i++) {
+        for (let j = 0; j < 8; j++) {
+          nestedWps.push({
+            claimable: nestedState.staking[i].claimable.toNumber(),
+            emission: nestedState.staking[i].emission.toNumber(),
+            lockTime: nestedState.staking[i].lockTime.toNumber(),
+            nest: nestedState.staking[i].nest.toBase58(),
+            stakedTime: nestedState.staking[i].stakedTime.toNumber(),
+            mint: nestedState.staking[i].woodpecker[j].toBase58(),
+          });
+        }
+      }
+    }
+
     const nftList = await getParsedNftAccountsByOwner({
       publicAddress: wallet.publicKey.toBase58(),
       connection: solConnection,
@@ -68,59 +105,192 @@ const StakingPage: NextPage = () => {
 
     let blazinList: NFTType[] = [];
     let nestsList: NFTType[] = [];
-    for (let item of nftList) {
-      if (
-        item.data.creators &&
-        item.data.creators[0].address === CREATOR_ADDRESS_BLAZIN
-      ) {
-        const filtered = userNfts.filter(
-          (nft: any) => nft.mint === item.mint
-        )[0];
-        blazinList.push({
-          mint: item.mint,
-          id: item.data.name.split("#")[1],
-          uri: item.data.uri,
-          image: "",
-          name: item.data.name,
-          selected: false,
-          tier: "0",
-          staked: filtered ? true : false,
-          isMulti: false,
-          stakedTime: filtered ? filtered.stakedTime : now,
-          lockTime: filtered ? filtered.lockTime : now,
-          claimable: filtered ? filtered.claimable : 0,
-          lockLength: filtered
-            ? (filtered.lockTime - filtered.stakedTime > 0
-                ? filtered.lockTime - filtered.stakedTime
-                : 0) / EPOCH
-            : 0,
-        });
-      } else if (
-        item.data.creators &&
-        item.data.creators[0].address === CREATOR_ADDRESS_NEST
-      ) {
-        const filtered = userNfts.filter(
-          (nft: any) => nft.mint === item.mint
-        )[0];
-        nestsList.push({
-          mint: item.mint,
-          id: item.data.name.split("#")[1],
-          uri: item.data.uri,
-          image: "",
-          name: item.data.name,
-          selected: false,
-          tier: "0",
-          staked: filtered ? true : false,
-          isMulti: false,
-          stakedTime: filtered ? filtered.stakedTime : now,
-          lockTime: filtered ? filtered.lockTime : now,
-          claimable: filtered ? filtered.claimable : 0,
-          lockLength: filtered
-            ? (filtered.lockTime - filtered.stakedTime > 0
-                ? filtered.lockTime - filtered.stakedTime
-                : 0) / EPOCH
-            : 0,
-        });
+    if (nestedState) {
+      for (let item of nftList) {
+        if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_BLAZIN
+        ) {
+          const filtered = userNfts.filter(
+            (nft: any) => nft.mint === item.mint
+          )[0];
+          const filteredNest = nestedWps.filter(
+            (nft) => item.mint === nft.mint
+          )[0];
+
+          blazinList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: filtered || filteredNest,
+            isMulti: false,
+            stakedTime: filtered
+              ? filtered.stakedTime
+              : filteredNest
+              ? filteredNest.stakedTime
+              : now,
+            lockTime: filtered
+              ? filtered.lockTime
+              : filteredNest
+              ? filteredNest.lockTime
+              : now,
+            claimable: filtered
+              ? filtered.claimable
+              : filteredNest
+              ? filteredNest.claimable
+              : 0,
+            lockLength: filtered
+              ? (filtered.lockTime - filtered.stakedTime > 0
+                  ? filtered.lockTime - filtered.stakedTime
+                  : 0) / EPOCH
+              : filteredNest
+              ? (filteredNest.lockTime - filteredNest.stakedTime > 0
+                  ? filteredNest.lockTime - filteredNest.stakedTime
+                  : 0) / EPOCH
+              : 0,
+            nested: filteredNest ? true : false,
+            ransacked: false,
+          });
+        } else if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_NEST
+        ) {
+          const filtered = userNfts.filter(
+            (nft: any) => nft.mint === item.mint
+          )[0];
+          nestsList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: filtered ? true : false,
+            isMulti: false,
+            stakedTime: filtered ? filtered.stakedTime : now,
+            lockTime: filtered ? filtered.lockTime : now,
+            claimable: filtered ? filtered.claimable : 0,
+            lockLength: filtered
+              ? (filtered.lockTime - filtered.stakedTime > 0
+                  ? filtered.lockTime - filtered.stakedTime
+                  : 0) / EPOCH
+              : 0,
+            nested: false,
+            ransacked: false,
+          });
+        }
+      }
+    } else if (userNfts) {
+      for (let item of nftList) {
+        if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_BLAZIN
+        ) {
+          const filtered = userNfts.filter(
+            (nft: any) => nft.mint === item.mint
+          )[0];
+
+          blazinList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: filtered ? true : false,
+            isMulti: false,
+            stakedTime: filtered ? filtered.stakedTime : now,
+            lockTime: filtered ? filtered.lockTime : now,
+            claimable: filtered ? filtered.claimable : 0,
+            lockLength: filtered
+              ? (filtered.lockTime - filtered.stakedTime > 0
+                  ? filtered.lockTime - filtered.stakedTime
+                  : 0) / EPOCH
+              : 0,
+            nested: false,
+            ransacked: false,
+          });
+        } else if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_NEST
+        ) {
+          const filtered = userNfts.filter(
+            (nft: any) => nft.mint === item.mint
+          )[0];
+          nestsList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: filtered ? true : false,
+            isMulti: false,
+            stakedTime: filtered ? filtered.stakedTime : now,
+            lockTime: filtered ? filtered.lockTime : now,
+            claimable: filtered ? filtered.claimable : 0,
+            lockLength: filtered
+              ? (filtered.lockTime - filtered.stakedTime > 0
+                  ? filtered.lockTime - filtered.stakedTime
+                  : 0) / EPOCH
+              : 0,
+            nested: false,
+            ransacked: false,
+          });
+        }
+      }
+    } else {
+      for (let item of nftList) {
+        if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_BLAZIN
+        ) {
+          blazinList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: false,
+            isMulti: false,
+            stakedTime: now as number,
+            lockTime: now as number,
+            claimable: 0,
+            lockLength: 0,
+            nested: false,
+            ransacked: false,
+          });
+        } else if (
+          item.data.creators &&
+          item.data.creators[0].address === CREATOR_ADDRESS_NEST
+        ) {
+          nestsList.push({
+            mint: item.mint,
+            id: item.data.name.split("#")[1],
+            uri: item.data.uri,
+            image: "",
+            name: item.data.name,
+            selected: false,
+            tier: "0",
+            staked: false,
+            isMulti: false,
+            stakedTime: now as number,
+            lockTime: now as number,
+            claimable: 0,
+            lockLength: 0,
+            nested: false,
+            ransacked: false,
+          });
+        }
       }
     }
     let blazinMetaList: { image: string; name: string }[] = await Promise.all(

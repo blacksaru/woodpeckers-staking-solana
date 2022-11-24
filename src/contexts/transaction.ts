@@ -1131,7 +1131,7 @@ export const createNestToPoolTx = async (
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
@@ -1173,6 +1173,7 @@ export const createNestToPoolTx = async (
         nestEditionInfo,
         nestMetadata,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1365,6 +1366,7 @@ export const createWithdrawNftTx = async (
         userRewardAccount: ret1.destinationAccounts[0],
         nftMint: mint,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1386,8 +1388,11 @@ export const createWithdrawNestNftTx = async (
     STAKING_PROGRAM_ID
   );
 
+  console.log(nestMint.toBase58(), "==================");
   let userNestAccount = await getAssociatedTokenAccount(userAddress, nestMint);
+  console.log(userNestAccount.toBase58());
   if (!(await isExistAccount(userNestAccount, connection))) {
+    console.log(nestMint.toBase58());
     let accountOfNFT = await getNFTTokenAccount(nestMint, connection);
     if (userNestAccount.toBase58() != accountOfNFT.toBase58()) {
       let nftOwner = await getOwnerOfNFT(nestMint, connection);
@@ -1417,11 +1422,16 @@ export const createWithdrawNestNftTx = async (
     STAKING_PROGRAM_ID
   );
 
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
   let woodPeckers = await getNestedData(userAddress, nestMint);
   if (woodPeckers === null) return;
   let remainingAccounts = [];
+
   for (let i = 0; i < woodPeckers.length; i++) {
+    console.log(PublicKey.default.toBase58());
+    if (woodPeckers[i].toBase58() === PublicKey.default.toBase58()) {
+      continue;
+    }
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
       woodPeckers[i]
@@ -1453,13 +1463,14 @@ export const createWithdrawNestNftTx = async (
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
       isSigner: false,
       isWritable: false,
     });
+    console.log("+++++++++++++++++++++++");
   }
 
   let tx = new Transaction();
@@ -1477,8 +1488,9 @@ export const createWithdrawNestNftTx = async (
         rewardVault,
         userRewardAccount: ret.destinationAccounts[0],
         nestMint,
-        nestEditionId,
+        nestEditionInfo,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1538,6 +1550,11 @@ export const createWithdrawRansackNftTx = async (
   let remainingAccounts = [];
   if (woodPeckers === null) return;
   for (let i = 0; i < woodPeckers.length; i++) {
+    console.log(PublicKey.default.toBase58());
+    if (woodPeckers[i].toBase58() === PublicKey.default.toBase58()) {
+      continue;
+    }
+    console.log("hdhd");
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
       woodPeckers[i]
@@ -1632,6 +1649,7 @@ export const createWithdrawRansackNftTx = async (
         nestMint,
         nestEditionId,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
