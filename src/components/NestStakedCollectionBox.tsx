@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import { NFTType } from "../pages/staking";
@@ -43,6 +44,8 @@ export default function NestStakedCollectionBox(props: {
   const [isReady, setIsReady] = useState(false);
   const [nestedNfts, setNestedNfts] = useState<NestedType[]>();
 
+  const [boxLoading, setBoxLoading] = useState(false);
+
   const update = () => {
     updatePage();
     closeOverlay();
@@ -57,35 +60,40 @@ export default function NestStakedCollectionBox(props: {
     if (wallet.publicKey === null) return;
     if (wpNftList === undefined) return;
     if (nestNftList === undefined) return;
+    setBoxLoading(true);
     const nestedData = await getNestPoolState(wallet.publicKey);
     let list: NestedType[] = [];
 
     if (nestedData) {
       for (let i = 0; i < nestedData.stakedCount.toNumber(); i++) {
         let wps: NFTType[] = [];
-        const nest = nestNftList.filter(
+        const nest = nestNftList.find(
           (nft) => nft.mint === nestedData.staking[i].nest.toBase58()
-        )[0];
-        for (let j = 0; j < 8; j++) {
-          const wp = wpNftList.filter(
-            (nft) => nft.mint === nestedData.staking[i].woodpecker[j].toBase58()
-          )[0];
-          if (wp) {
-            wps.push(wp);
+        );
+        if (nest) {
+          for (let j = 0; j < 8; j++) {
+            const wp = wpNftList.find(
+              (nft) =>
+                nft.mint === nestedData.staking[i].woodpecker[j].toBase58()
+            );
+            if (wp) {
+              wps.push(wp);
+            }
           }
+          list.push({
+            claimable: nestedData.staking[i].claimable.toNumber(),
+            emission: nestedData.staking[i].emission.toNumber(),
+            lockTime: nestedData.staking[i].lockTime.toNumber(),
+            stakedTime: nestedData.staking[i].stakedTime.toNumber(),
+            nest: nest,
+            woodpecker: wps,
+          });
         }
-        list.push({
-          claimable: nestedData.staking[i].claimable.toNumber(),
-          emission: nestedData.staking[i].emission.toNumber(),
-          lockTime: nestedData.staking[i].lockTime.toNumber(),
-          stakedTime: nestedData.staking[i].stakedTime.toNumber(),
-          nest: nest,
-          woodpecker: wps,
-        });
       }
     }
     setNestedNfts(list);
     setForceRender(!forceRender);
+    setBoxLoading(false);
   };
 
   useEffect(() => {
@@ -93,8 +101,12 @@ export default function NestStakedCollectionBox(props: {
     if (wallet.publicKey === null) {
       setNestedNfts([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wallet.publicKey, wallet.connected, wpNftList, nestNftList]);
+  }, [
+    wallet.publicKey,
+    wallet.connected,
+    JSON.stringify(wpNftList),
+    JSON.stringify(nestNftList),
+  ]);
 
   return (
     <div
@@ -112,7 +124,7 @@ export default function NestStakedCollectionBox(props: {
         }}
       >
         <h3>{title}</h3>
-        {loading ? (
+        {loading && boxLoading ? (
           <div className="nft-gallery">
             {[1, 2, 3, 4, 5].map((item, key) => (
               <Skeleton

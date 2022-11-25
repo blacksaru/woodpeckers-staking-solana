@@ -234,10 +234,6 @@ const StakingPage: NextPage = () => {
         )
       );
 
-    console.log(normalStakedWps, "normalStakedWps");
-    console.log(nestedWps, "nestedWps");
-    console.log(missionedWps, "missionedWps");
-
     for (let i = 0; i < blazinList.length; i++) {
       blazinList[i].image = blazinMetaList[i].image;
       const normaled = normalStakedWps.find(
@@ -284,7 +280,6 @@ const StakingPage: NextPage = () => {
         nestsList[i].staked = true;
         nestsList[i].claimable = nested.claimable;
         nestsList[i].lockTime = nested.lockTime;
-        nestsList[i].mint = nested.mint;
         nestsList[i].stakedTime = nested.stakedTime;
         nestsList[i].nested = true;
       }
@@ -292,7 +287,6 @@ const StakingPage: NextPage = () => {
         nestsList[i].staked = true;
         nestsList[i].claimable = missined.claimable;
         nestsList[i].lockTime = missined.lockTime;
-        nestsList[i].mint = missined.mint;
         nestsList[i].ransacked = true;
       }
     }

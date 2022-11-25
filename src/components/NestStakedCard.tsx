@@ -31,6 +31,7 @@ export default function NestStakedCard(props: {
     updatePage,
   } = props;
 
+  console.log(nest, wpNfts, "++++=");
   const [loading, setLoading] = useState(false);
   const [claimLoading, setClaimLoading] = useState(false);
 
@@ -78,7 +79,8 @@ export default function NestStakedCard(props: {
       const duration = (nest.stakedTime - nest.lockTime) / EPOCH;
       setPlan(duration);
     }
-  }, [wpNfts, nest]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(wpNfts), nest]);
 
   return (
     <div className="nest-staked-card">
