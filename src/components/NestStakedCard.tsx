@@ -87,7 +87,7 @@ export default function NestStakedCard(props: {
           <div className="content-top">
             <div className="staked-detail">
               <div className="simple-nft-card">
-                <div className="id">#{24}</div>
+                <div className="id">#{nest.id}</div>
                 <div className="label">multiplier</div>
                 <img src={nest.image} alt="" />
               </div>
@@ -142,7 +142,11 @@ export default function NestStakedCard(props: {
               />
             </div>
             <div className="action">
-              <button className="btn-action" onClick={() => unstake()}>
+              <button
+                className="btn-action"
+                onClick={() => unstake()}
+                disabled={lockTime > now}
+              >
                 {loading ? <ClipLoader size={10} color="#fff" /> : <>unstake</>}
               </button>
               <button className="btn-action" onClick={() => handleClaim()}>

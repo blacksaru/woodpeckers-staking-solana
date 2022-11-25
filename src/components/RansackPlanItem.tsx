@@ -3,9 +3,11 @@ import { PublicKey } from "@solana/web3.js";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { ClipLoader } from "react-spinners";
 import { NFTType } from "../pages/staking";
+import { ransackToPool } from "../contexts/transaction";
 
 export default function RansackPlanItem(props: {
   wallet: WalletContextState;
+  missionId: number;
   title: string;
   description: any;
   lockTime: number;
@@ -19,6 +21,7 @@ export default function RansackPlanItem(props: {
 }) {
   const {
     wallet,
+    missionId,
     title,
     description,
     lockTime,
@@ -35,8 +38,24 @@ export default function RansackPlanItem(props: {
   };
 
   const handleStake = async () => {
-    setPlanId();
-    setEndProgress(true);
+    // setPlanId();
+    // setEndProgress(true);
+    if (selectedNest === undefined) return;
+    if (selectedWpNfts.length === 0) return;
+    try {
+      await ransackToPool(
+        wallet,
+        new PublicKey(selectedNest.mint),
+        selectedWpNfts,
+        missionId,
+        lockTime,
+        parseInt(selectedNest.tier),
+        setLoading,
+        () => update()
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="plan-item">

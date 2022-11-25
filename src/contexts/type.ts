@@ -19,7 +19,7 @@ export const EPOCH = 100;
 export const LOCKING_PERIOD = 60;
 export const USER_POOL_SIZE = 5656; // 8 + 5648
 export const USER_DUAL_POOL_SIZE = 32056; // 8 + 32048
-export const USER_RANSACK_POOL_SIZE = 32056; // 8 + 32048
+export const USER_RANSACK_POOL_SIZE = 34456; // 8 + 32048
 
 export interface GlobalPool {
   // 8 + 40
@@ -73,9 +73,9 @@ export interface RansackedData {
 }
 
 export interface UserRansackPool {
-  // 8 + 32048
+  // 8 + 34448
   owner: PublicKey; // 32
   stakedCount: anchor.BN; // 8
   accumulatedReward: anchor.BN; // 8
-  staking: NestedData[]; // 320 * 100
+  staking: RansackedData[]; // 344 * 100
 }

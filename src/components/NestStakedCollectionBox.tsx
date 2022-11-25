@@ -74,8 +74,6 @@ export default function NestStakedCollectionBox(props: {
             wps.push(wp);
           }
         }
-        console.log(nest);
-        console.log(wps);
         list.push({
           claimable: nestedData.staking[i].claimable.toNumber(),
           emission: nestedData.staking[i].emission.toNumber(),

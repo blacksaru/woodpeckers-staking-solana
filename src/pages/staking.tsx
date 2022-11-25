@@ -71,7 +71,6 @@ const StakingPage: NextPage = () => {
       }
     }
     const nestedState = await getNestPoolState(wallet.publicKey);
-    console.log(nestedState, "==> nestedState staked nfts");
 
     let nestedWps: {
       claimable: number;
@@ -105,7 +104,8 @@ const StakingPage: NextPage = () => {
 
     let blazinList: NFTType[] = [];
     let nestsList: NFTType[] = [];
-    if (nestedState) {
+    if (nestedState && userNfts) {
+      console.log(nestedState, "~~~~~ sdf sdfsdf");
       for (let item of nftList) {
         if (
           item.data.creators &&
@@ -159,8 +159,8 @@ const StakingPage: NextPage = () => {
           item.data.creators &&
           item.data.creators[0].address === CREATOR_ADDRESS_NEST
         ) {
-          const filtered = userNfts.filter(
-            (nft: any) => nft.mint === item.mint
+          const filterNest = nestedState.staking.filter(
+            (nest) => nest.nest.toBase58() === item.mint
           )[0];
           nestsList.push({
             mint: item.mint,
@@ -170,17 +170,24 @@ const StakingPage: NextPage = () => {
             name: item.data.name,
             selected: false,
             tier: "0",
-            staked: filtered ? true : false,
-            isMulti: false,
-            stakedTime: filtered ? filtered.stakedTime : now,
-            lockTime: filtered ? filtered.lockTime : now,
-            claimable: filtered ? filtered.claimable : 0,
-            lockLength: filtered
-              ? (filtered.lockTime - filtered.stakedTime > 0
-                  ? filtered.lockTime - filtered.stakedTime
+            staked: filterNest ? true : false,
+            isMulti: filterNest ? true : false,
+            stakedTime: filterNest
+              ? filterNest.stakedTime.toNumber()
+              : (now as number),
+            lockTime: filterNest
+              ? filterNest.lockTime.toNumber()
+              : (now as number),
+            claimable: filterNest ? filterNest.claimable.toNumber() : 0,
+            lockLength: filterNest
+              ? (filterNest.lockTime.toNumber() -
+                  filterNest.stakedTime.toNumber() >
+                0
+                  ? filterNest.lockTime.toNumber() -
+                    filterNest.stakedTime.toNumber()
                   : 0) / EPOCH
               : 0,
-            nested: false,
+            nested: filterNest ? true : false,
             ransacked: false,
           });
         }

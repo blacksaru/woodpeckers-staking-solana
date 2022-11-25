@@ -9,6 +9,7 @@ import UnstakedCardAtNest from "./UnstakedCardAtNest";
 import { PublicKey } from "@solana/web3.js";
 import { errorAlert } from "./toastGroup";
 import NestPlanItem from "./NestPlanItem";
+import { getNestPoolState } from "../contexts/transaction";
 
 export default function NestCollectionBox(props: {
   wallet: WalletContextState;
@@ -77,6 +78,17 @@ export default function NestCollectionBox(props: {
     setIsReady(true);
   };
 
+  const getNestedNests = async () => {
+    if (wallet.publicKey === null) return;
+    if (nestNftList === undefined) {
+      let nests = nestNftList;
+      console.log(nests, "~~~~~ > ");
+      const fetched = await getNestPoolState(wallet.publicKey);
+      if (fetched) {
+      }
+    }
+  };
+
   const handleSelect = (mint: string) => {
     let nfts = blazins;
     let selected: { mint: PublicKey }[] = [];
@@ -123,8 +135,16 @@ export default function NestCollectionBox(props: {
           break;
       }
     }
+    getNestedNests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNest, wpNftList]);
+  }, [
+    selectedNest,
+    wpNftList,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(nestNftList),
+    wallet.publicKey,
+    wallet.connected,
+  ]);
 
   return (
     <div

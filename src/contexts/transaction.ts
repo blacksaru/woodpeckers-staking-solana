@@ -326,6 +326,7 @@ export const ransackToPool = async (
   woodPecker: {
     mint: PublicKey;
   }[],
+  style: number,
   lockTime: number,
   tier: number,
   setLoading: Function,
@@ -348,7 +349,7 @@ export const ransackToPool = async (
     setLoading(true);
     let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
       userAddress,
-      "user-ransack-pool",
+      "1-user-ransack-pool",
       STAKING_PROGRAM_ID
     );
 
@@ -357,15 +358,19 @@ export const ransackToPool = async (
       await initUserRansackPool(wallet);
     }
 
-    const tx = await createNestToPoolTx(
+    const tx = await createRansackToPoolTx(
       nestMint,
       woodPecker,
+      style,
       userAddress,
       program,
       solConnection,
       lockTime,
       tier
     );
+
+    console.log(tx, "target tx");
+
     const { blockhash } = await provider.connection.getLatestBlockhash(
       "confirmed"
     );
@@ -373,7 +378,6 @@ export const ransackToPool = async (
     tx.recentBlockhash = blockhash;
     if (wallet.signTransaction !== undefined) {
       const signedTx = await wallet.signTransaction(tx);
-
       const txId = await provider.connection.sendRawTransaction(
         signedTx.serialize(),
         { skipPreflight: true, maxRetries: 3, preflightCommitment: "confirmed" }
@@ -936,14 +940,14 @@ export const createInitUserRansackPoolTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "1-user-ransack-pool",
     STAKING_PROGRAM_ID
   );
   console.log(USER_RANSACK_POOL_SIZE);
   let ix = SystemProgram.createAccountWithSeed({
     fromPubkey: userAddress,
     basePubkey: userAddress,
-    seed: "user-nest-pool",
+    seed: "1-user-ransack-pool",
     newAccountPubkey: userPoolKey,
     lamports: await connection.getMinimumBalanceForRentExemption(
       USER_RANSACK_POOL_SIZE
@@ -1186,7 +1190,8 @@ export const createNestToPoolTx = async (
 
 export const createRansackToPoolTx = async (
   nestMint: PublicKey,
-  woodpecker: PublicKey[],
+  woodpecker: { mint: PublicKey }[],
+  style: number,
   userAddress: PublicKey,
   program: anchor.Program,
   connection: Connection,
@@ -1218,16 +1223,19 @@ export const createRansackToPoolTx = async (
   }
   console.log("Nest NFT = ", nestMint.toBase58(), userNestAccount.toBase58());
 
-  let remainingAccounts = [];
+  let remainingAccounts: any = [];
   for (let i = 0; i < woodpecker.length; i++) {
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
-      woodpecker[i]
+      woodpecker[i].mint
     );
     if (!(await isExistAccount(userWoodAccount, connection))) {
-      let accountOfNFT = await getNFTTokenAccount(woodpecker[i], connection);
+      let accountOfNFT = await getNFTTokenAccount(
+        woodpecker[i].mint,
+        connection
+      );
       if (userWoodAccount.toBase58() != accountOfNFT.toBase58()) {
-        let nftOwner = await getOwnerOfNFT(woodpecker[i], connection);
+        let nftOwner = await getOwnerOfNFT(woodpecker[i].mint, connection);
         if (nftOwner.toBase58() == userAddress.toBase58())
           userWoodAccount = accountOfNFT;
         else if (nftOwner.toBase58() !== globalAuthority.toBase58()) {
@@ -1237,11 +1245,11 @@ export const createRansackToPoolTx = async (
     }
     console.log(
       "Woodpecker NFT = ",
-      woodpecker[i].toBase58(),
+      woodpecker[i].mint.toBase58(),
       userWoodAccount.toBase58()
     );
 
-    let woodEditionId = await Edition.getPDA(woodpecker[i]);
+    let woodEditionId = await Edition.getPDA(woodpecker[i].mint);
 
     remainingAccounts.push({
       pubkey: woodpecker[i],
@@ -1276,28 +1284,35 @@ export const createRansackToPoolTx = async (
   }
 
   const nestMetadata = await getMetadata(nestMint);
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
 
   let tx = new Transaction();
 
   tx.add(
-    program.instruction.ransackToPool(bump, tier, new anchor.BN(lockTime), {
-      accounts: {
-        owner: userAddress,
-        globalAuthority,
-        userDualPool: userDualPoolKey,
-        userNestAccount,
-        nestMint,
-        userTokenAccount,
-        destTokenAccount,
-        nestEditionId,
-        nestMetadata,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      },
-      remainingAccounts,
-      instructions: [],
-      signers: [],
-    })
+    program.instruction.ransackToPool(
+      bump,
+      tier,
+      new anchor.BN(style),
+      new anchor.BN(lockTime),
+      {
+        accounts: {
+          owner: userAddress,
+          globalAuthority,
+          userDualPool: userDualPoolKey,
+          userNestAccount,
+          nestMint,
+          userTokenAccount,
+          destTokenAccount,
+          nestEditionInfo,
+          nestMetadata,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          tokenMetadataProgram: METAPLEX,
+        },
+        remainingAccounts,
+        instructions: [],
+        signers: [],
+      }
+    )
   );
 
   return tx;
@@ -1765,7 +1780,7 @@ export const createRansackClaimTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "1-user-ransack-pool",
     STAKING_PROGRAM_ID
   );
 
@@ -1951,14 +1966,25 @@ export const getNestPoolState = async (
 };
 
 export const getRansackPoolState = async (
-  userAddress: PublicKey,
-  program: anchor.Program
+  userAddress: PublicKey
 ): Promise<UserRansackPool | null> => {
+  const cloneWindow: any = window;
+  const provider = new anchor.AnchorProvider(
+    solConnection,
+    cloneWindow["solana"],
+    anchor.AnchorProvider.defaultOptions()
+  );
+  const program = new anchor.Program(
+    StakingIDL as anchor.Idl,
+    STAKING_PROGRAM_ID,
+    provider
+  );
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "1-user-ransack-pool",
     STAKING_PROGRAM_ID
   );
+  console.log(userPoolKey.toBase58());
   try {
     let userPoolState = await program.account.userRansackPool.fetch(
       userPoolKey
