@@ -71,6 +71,22 @@ export type Staking = {
       args: [];
     },
     {
+      name: "initializeUserRansackPool";
+      accounts: [
+        {
+          name: "userDualPool";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        }
+      ];
+      args: [];
+    },
+    {
       name: "stakeNftToPool";
       accounts: [
         {
@@ -970,6 +986,22 @@ export const IDL: Staking = {
     },
     {
       name: "initializeUserDualPool",
+      accounts: [
+        {
+          name: "userDualPool",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: "initializeUserRansackPool",
       accounts: [
         {
           name: "userDualPool",

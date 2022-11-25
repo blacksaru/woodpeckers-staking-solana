@@ -55,6 +55,8 @@ export default function RansackBox(props: {
     setPlanId(-1);
     setEndProgress(false);
     setIsChoosePlan(false);
+    setSelectedNest(undefined);
+    setSelectedWpNfts([]);
     updatePage();
   };
 

@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { EPOCH } from "../contexts/type";
+import { getNetworkTime } from "../contexts/utils";
 import { NFTType } from "../pages/staking";
 import RansackEndTimeCountdown from "./RansackEndTimeCountdown";
 
@@ -12,6 +14,17 @@ export default function MissionItem(props: {
   isEnd: boolean;
 }) {
   const { nest, wpNfts, isEnd, updatePage } = props;
+  const [now, setNow] = useState(Math.floor(new Date().getTime() / 1000));
+
+  const getNowTime = async () => {
+    const now = (await getNetworkTime()) as number;
+    console.log(now);
+    setNow(now);
+  };
+  useEffect(() => {
+    getNowTime();
+  }, [props.nest]);
+
   return (
     <div className={`one-mission ${isEnd ? "ended" : ""}`}>
       {nest && (
@@ -29,7 +42,7 @@ export default function MissionItem(props: {
               <div className="title-box">
                 <div className="title-item">
                   <h5>Woodpeckers</h5>
-                  <span>2</span>
+                  <span>{wpNfts.length}</span>
                 </div>
                 <div className="title-item">
                   <h5>Staked</h5>
@@ -45,8 +58,8 @@ export default function MissionItem(props: {
           {!isEnd && (
             <RansackEndTimeCountdown
               endAction={updatePage}
-              duration={35}
-              endTime={new Date("2022-12-12")}
+              duration={(nest.stakedTime - nest.lockTime) / EPOCH}
+              endTime={new Date(nest.lockTime * 1000)}
             />
           )}
           {isEnd && (

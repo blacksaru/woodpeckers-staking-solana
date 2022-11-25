@@ -9,7 +9,7 @@ import UnstakedCardAtNest from "./UnstakedCardAtNest";
 import { PublicKey } from "@solana/web3.js";
 import { errorAlert } from "./toastGroup";
 import NestPlanItem from "./NestPlanItem";
-import { getNestPoolState } from "../contexts/transaction";
+import { getNestPoolState, getRansackPoolState } from "../contexts/transaction";
 
 export default function NestCollectionBox(props: {
   wallet: WalletContextState;
@@ -78,14 +78,16 @@ export default function NestCollectionBox(props: {
     setIsReady(true);
   };
 
-  const getNestedNests = async () => {
+  const getStakedNests = async () => {
     if (wallet.publicKey === null) return;
-    if (nestNftList === undefined) {
-      let nests = nestNftList;
-      console.log(nests, "~~~~~ > ");
-      const fetched = await getNestPoolState(wallet.publicKey);
-      if (fetched) {
-      }
+    if (nestNftList === undefined) return;
+    let nests = nestNftList;
+    const nested = await getNestPoolState(wallet.publicKey);
+    const missioned = await getRansackPoolState(wallet.publicKey);
+    console.log(nested, "==> nested");
+    console.log(missioned, "==> missioned");
+    if (missioned) {
+      for (let i = 0; i < missioned.stakedCount.toNumber(); i++) {}
     }
   };
 
@@ -135,7 +137,7 @@ export default function NestCollectionBox(props: {
           break;
       }
     }
-    getNestedNests();
+    // getStakedNests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedNest,

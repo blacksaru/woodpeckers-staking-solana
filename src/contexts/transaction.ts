@@ -349,7 +349,7 @@ export const ransackToPool = async (
     setLoading(true);
     let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
       userAddress,
-      "1-user-ransack-pool",
+      "user-ransack-pool-1",
       STAKING_PROGRAM_ID
     );
 
@@ -940,14 +940,14 @@ export const createInitUserRansackPoolTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "1-user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
   console.log(USER_RANSACK_POOL_SIZE);
   let ix = SystemProgram.createAccountWithSeed({
     fromPubkey: userAddress,
     basePubkey: userAddress,
-    seed: "1-user-ransack-pool",
+    seed: "user-ransack-pool-1",
     newAccountPubkey: userPoolKey,
     lamports: await connection.getMinimumBalanceForRentExemption(
       USER_RANSACK_POOL_SIZE
@@ -960,7 +960,7 @@ export const createInitUserRansackPoolTx = async (
   console.log("==>initializing user dual PDA", userPoolKey.toBase58());
   tx.add(ix);
   tx.add(
-    program.instruction.initializeUserDualPool({
+    program.instruction.initializeUserRansackPool({
       accounts: {
         userDualPool: userPoolKey,
         owner: userAddress,
@@ -1205,7 +1205,7 @@ export const createRansackToPoolTx = async (
 
   let userDualPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-nest-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
@@ -1252,14 +1252,14 @@ export const createRansackToPoolTx = async (
     let woodEditionId = await Edition.getPDA(woodpecker[i].mint);
 
     remainingAccounts.push({
-      pubkey: woodpecker[i],
+      pubkey: woodpecker[i].mint,
       isSigner: false,
       isWritable: false,
     });
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
@@ -1780,7 +1780,7 @@ export const createRansackClaimTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "1-user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
@@ -1859,10 +1859,7 @@ export const getUserPoolInfo = async (userAddress: PublicKey) => {
     STAKING_PROGRAM_ID,
     provider
   );
-  const userInfo: UserPool | null = await getUserPoolState(
-    userAddress,
-    program
-  );
+  const userInfo: UserPool | null = await getUserPoolState(userAddress);
   if (userInfo === null) return;
   return {
     owner: userInfo.owner.toBase58(),
@@ -1922,9 +1919,19 @@ export const getGlobalState = async (
 };
 
 export const getUserPoolState = async (
-  userAddress: PublicKey,
-  program: anchor.Program
+  userAddress: PublicKey
 ): Promise<UserPool | null> => {
+  const cloneWindow: any = window;
+  const provider = new anchor.AnchorProvider(
+    solConnection,
+    cloneWindow["solana"],
+    anchor.AnchorProvider.defaultOptions()
+  );
+  const program = new anchor.Program(
+    StakingIDL as anchor.Idl,
+    STAKING_PROGRAM_ID,
+    provider
+  );
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
     "user-pool",
@@ -1981,7 +1988,7 @@ export const getRansackPoolState = async (
   );
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "1-user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
   console.log(userPoolKey.toBase58());
