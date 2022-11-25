@@ -11,9 +11,10 @@ export default function MissionItem(props: {
   nest: NFTType | undefined;
   wpNfts: NFTType[];
   updatePage: Function;
+  lockTime: number;
   isEnd: boolean;
 }) {
-  const { nest, wpNfts, isEnd, updatePage } = props;
+  const { nest, wpNfts, lockTime, isEnd, updatePage } = props;
   const [now, setNow] = useState(Math.floor(new Date().getTime() / 1000));
 
   const getNowTime = async () => {
@@ -26,7 +27,7 @@ export default function MissionItem(props: {
   }, [props.nest]);
 
   return (
-    <div className={`one-mission ${isEnd ? "ended" : ""}`}>
+    <div className={`one-mission ${now > lockTime ? "ended" : ""}`}>
       {nest && (
         <>
           <div className="content">
@@ -55,14 +56,14 @@ export default function MissionItem(props: {
               </div>
             </div>
           </div>
-          {!isEnd && (
+          {!(now > lockTime) && (
             <RansackEndTimeCountdown
               endAction={updatePage}
               duration={(nest.stakedTime - nest.lockTime) / EPOCH}
               endTime={new Date(nest.lockTime * 1000)}
             />
           )}
-          {isEnd && (
+          {now > lockTime && (
             <div className="ransack-time-ended">
               <p>Time Ended</p>
               <button className="">claim rewards</button>

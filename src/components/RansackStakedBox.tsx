@@ -78,6 +78,7 @@ export default function RansackStakedBox(props: {
                 key={key}
                 updatePage={updatePage}
                 wallet={wallet}
+                lockTime={item.lockTime}
                 nest={item.nest}
                 isEnd={key === 4}
                 wpNfts={item.woodpecker}
