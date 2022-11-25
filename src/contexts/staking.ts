@@ -71,6 +71,22 @@ export type Staking = {
       args: [];
     },
     {
+      name: "initializeUserRansackPool";
+      accounts: [
+        {
+          name: "userDualPool";
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: "owner";
+          isMut: true;
+          isSigner: true;
+        }
+      ];
+      args: [];
+    },
+    {
       name: "stakeNftToPool";
       accounts: [
         {
@@ -176,6 +192,11 @@ export type Staking = {
         },
         {
           name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenMetadataProgram";
           isMut: false;
           isSigner: false;
         }
@@ -287,6 +308,11 @@ export type Staking = {
           name: "tokenProgram";
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: "tokenMetadataProgram";
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
@@ -349,6 +375,11 @@ export type Staking = {
         },
         {
           name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenMetadataProgram";
           isMut: false;
           isSigner: false;
         }
@@ -460,6 +491,11 @@ export type Staking = {
           name: "tokenProgram";
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: "tokenMetadataProgram";
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
@@ -557,6 +593,11 @@ export type Staking = {
         },
         {
           name: "tokenProgram";
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: "tokenMetadataProgram";
           isMut: false;
           isSigner: false;
         }
@@ -960,6 +1001,22 @@ export const IDL: Staking = {
       args: [],
     },
     {
+      name: "initializeUserRansackPool",
+      accounts: [
+        {
+          name: "userDualPool",
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: "owner",
+          isMut: true,
+          isSigner: true,
+        },
+      ],
+      args: [],
+    },
+    {
       name: "stakeNftToPool",
       accounts: [
         {
@@ -1065,6 +1122,11 @@ export const IDL: Staking = {
         },
         {
           name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenMetadataProgram",
           isMut: false,
           isSigner: false,
         },
@@ -1177,6 +1239,11 @@ export const IDL: Staking = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: "tokenMetadataProgram",
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
@@ -1238,6 +1305,11 @@ export const IDL: Staking = {
         },
         {
           name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenMetadataProgram",
           isMut: false,
           isSigner: false,
         },
@@ -1350,6 +1422,11 @@ export const IDL: Staking = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: "tokenMetadataProgram",
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
@@ -1446,6 +1523,11 @@ export const IDL: Staking = {
         },
         {
           name: "tokenProgram",
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: "tokenMetadataProgram",
           isMut: false,
           isSigner: false,
         },

@@ -1,15 +1,21 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import { NFTType } from "../pages/staking";
 import Skeleton from "@mui/material/Skeleton";
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import NestUnstakedCard from "./NestUnstakedCard";
-import { BoxBackIcon, CircleClose } from "./svgIcons";
-import UnstakedCardAtNest from "./UnstakedCardAtNest";
-import { PublicKey } from "@solana/web3.js";
-import { errorAlert } from "./toastGroup";
 import NestPlanItem from "./NestPlanItem";
 import NestStakedCard from "./NestStakedCard";
+import { getNestPoolState } from "../contexts/transaction";
+
+export interface NestedType {
+  claimable: number;
+  emission: number;
+  lockTime: number;
+  stakedTime: number;
+  nest: NFTType;
+  woodpecker: NFTType[];
+}
 
 export default function NestStakedCollectionBox(props: {
   wallet: WalletContextState;
@@ -36,17 +42,9 @@ export default function NestStakedCollectionBox(props: {
 
   const [forceRender, setForceRender] = useState(false);
   const [isReady, setIsReady] = useState(false);
-  const [selectedNest, setSelectedNest] = useState<NFTType>();
-  const [maxWpCnt, setMaxWpCnt] = useState(1);
-  const [isShowWps, setIsShowWps] = useState(false);
-  const [isStakingPlan, setIsStakingPlan] = useState(false);
-  const [tier, setTier] = useState(1);
+  const [nestedNfts, setNestedNfts] = useState<NestedType[]>();
 
-  const [blazins, setBlazins] = useState<NFTType[]>();
-  const [selectedNfts, setSelectedNfts] = useState<{ mint: PublicKey }[]>([]);
-  const [selectedMainNfts, setSelectedMainNfts] = useState<
-    { mint: PublicKey }[]
-  >([]);
+  const [boxLoading, setBoxLoading] = useState(false);
 
   const update = () => {
     updatePage();
@@ -56,45 +54,59 @@ export default function NestStakedCollectionBox(props: {
   const closeOverlay = () => {
     setIsReady(false);
     setIsOverlay(false);
-    setIsStakingPlan(false);
-    setSelectedMainNfts([]);
   };
 
-  const closeIsShowWps = () => {
-    if (selectedNfts.length <= maxWpCnt) {
-      setIsShowWps(false);
-      setSelectedMainNfts(selectedNfts);
-    } else {
-      errorAlert(`Max WP amount should be ${maxWpCnt}`);
-    }
-  };
+  const getNestedNfts = async () => {
+    if (wallet.publicKey === null) return;
+    if (wpNftList === undefined) return;
+    if (nestNftList === undefined) return;
+    setBoxLoading(true);
+    const nestedData = await getNestPoolState(wallet.publicKey);
+    let list: NestedType[] = [];
 
-  const closeClerIsShowWps = () => {
-    setIsShowWps(false);
-  };
-
-  const showSelectBox = () => {
-    setIsOverlay(true);
-    setIsReady(true);
-  };
-
-  const handleSelect = (mint: string) => {
-    let nfts = blazins;
-    let selected: { mint: PublicKey }[] = [];
-    if (nfts) {
-      for (let i = 0; i < nfts.length; i++) {
-        if (nfts[i].mint === mint) {
-          nfts[i].selected = !nfts[i].selected;
-        }
-        if (nfts[i].selected) {
-          selected.push({ mint: new PublicKey(nfts[i].mint) });
+    if (nestedData) {
+      for (let i = 0; i < nestedData.stakedCount.toNumber(); i++) {
+        let wps: NFTType[] = [];
+        const nest = nestNftList.find(
+          (nft) => nft.mint === nestedData.staking[i].nest.toBase58()
+        );
+        if (nest) {
+          for (let j = 0; j < 8; j++) {
+            const wp = wpNftList.find(
+              (nft) =>
+                nft.mint === nestedData.staking[i].woodpecker[j].toBase58()
+            );
+            if (wp) {
+              wps.push(wp);
+            }
+          }
+          list.push({
+            claimable: nestedData.staking[i].claimable.toNumber(),
+            emission: nestedData.staking[i].emission.toNumber(),
+            lockTime: nestedData.staking[i].lockTime.toNumber(),
+            stakedTime: nestedData.staking[i].stakedTime.toNumber(),
+            nest: nest,
+            woodpecker: wps,
+          });
         }
       }
-      setSelectedNfts(selected);
-      // console.log(selected);
     }
+    setNestedNfts(list);
     setForceRender(!forceRender);
+    setBoxLoading(false);
   };
+
+  useEffect(() => {
+    getNestedNfts();
+    if (wallet.publicKey === null) {
+      setNestedNfts([]);
+    }
+  }, [
+    wallet.publicKey,
+    wallet.connected,
+    JSON.stringify(wpNftList),
+    JSON.stringify(nestNftList),
+  ]);
 
   return (
     <div
@@ -112,7 +124,7 @@ export default function NestStakedCollectionBox(props: {
         }}
       >
         <h3>{title}</h3>
-        {loading ? (
+        {loading && boxLoading ? (
           <div className="nft-gallery">
             {[1, 2, 3, 4, 5].map((item, key) => (
               <Skeleton
@@ -126,26 +138,21 @@ export default function NestStakedCollectionBox(props: {
           </div>
         ) : (
           <div className="nest-staked-gallery">
-            {nestNftList &&
-              nestNftList.length !== 0 &&
-              nestNftList.map(
-                (item, key) =>
-                  !item.staked && (
-                    <NestStakedCard
-                      key={key}
-                      // id={item.id}
-                      // nft={item}
-                      // mint={item.mint}
-                      // uri={item.uri}
-                      // key={key}
-                      // image={item.image}
-                      // selected={item.selected}
-                      // showSelectBox={showSelectBox}
-                      // setSelectedNest={setSelectedNest}
-                      // setIsShowWps={setIsShowWps}
-                    />
-                  )
-              )}
+            {nestedNfts &&
+              nestedNfts.length !== 0 &&
+              nestedNfts.map((item, key) => (
+                <NestStakedCard
+                  key={key}
+                  wallet={wallet}
+                  nest={item.nest}
+                  wpNfts={item.woodpecker}
+                  stakedTime={item.stakedTime}
+                  lockTime={item.lockTime}
+                  emission={item.emission}
+                  claimable={item.claimable}
+                  updatePage={update}
+                />
+              ))}
           </div>
         )}
       </div>

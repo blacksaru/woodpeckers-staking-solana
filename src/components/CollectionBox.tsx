@@ -45,13 +45,17 @@ export default function CollectionBox(props: {
     }
     setNfts(nfts);
     setSelectedNfts(selected);
-    console.log(selected);
     setForceRender(!forceRender);
   };
 
   const handleIsReady = (type: string) => {
     setIsReady(true);
     setIsOverlay(true);
+  };
+
+  const update = () => {
+    updatePage();
+    closeOverlay();
   };
 
   const closeOverlay = () => {
@@ -96,7 +100,7 @@ export default function CollectionBox(props: {
                   }
                   lockTime={0}
                   selectedNfts={selectedNfts}
-                  updatePage={updatePage}
+                  updatePage={update}
                 />
                 <PlanItem
                   wallet={wallet}
@@ -108,7 +112,7 @@ export default function CollectionBox(props: {
                   }
                   lockTime={10}
                   selectedNfts={selectedNfts}
-                  updatePage={updatePage}
+                  updatePage={update}
                 />
                 <PlanItem
                   wallet={wallet}
@@ -120,7 +124,7 @@ export default function CollectionBox(props: {
                   }
                   lockTime={20}
                   selectedNfts={selectedNfts}
-                  updatePage={updatePage}
+                  updatePage={update}
                 />
                 <PlanItem
                   wallet={wallet}
@@ -132,7 +136,7 @@ export default function CollectionBox(props: {
                   }
                   lockTime={35}
                   selectedNfts={selectedNfts}
-                  updatePage={updatePage}
+                  updatePage={update}
                 />
               </div>
             </div>

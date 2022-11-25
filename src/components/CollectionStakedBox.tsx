@@ -74,10 +74,17 @@ export default function CollectionStakedBox(props: {
       >
         <h3>{title}</h3>
         <div className="action-buttons">
-          <button
+          {/* <button
             className="btn-action"
             disabled={selectedNfts.length === 0}
             onClick={() => handleIsReady("single")}
+          >
+            unstake
+          </button> */}
+          <button
+            className="btn-action"
+            disabled={selectedNfts.length === 0}
+            onClick={() => handleIsReady("all")}
           >
             collect rewards
           </button>
@@ -116,12 +123,14 @@ export default function CollectionStakedBox(props: {
                         <StakedCard
                           wallet={wallet}
                           id={item.id}
+                          nft={item}
                           mint={item.mint}
                           uri={item.uri}
                           lockTime={item.lockTime}
                           lockLength={item.lockLength}
                           key={key}
                           image={item.image}
+                          nested={item.nested}
                           selected={item.selected}
                           handleSelect={handleSelect}
                           updatePage={updatePage}

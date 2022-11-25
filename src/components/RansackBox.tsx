@@ -3,6 +3,7 @@
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import React, { useEffect, useState } from "react";
+import { ClipLoader } from "react-spinners";
 import { NFTType } from "../pages/staking";
 import NestUnstakedCard from "./NestUnstakedCard";
 import RansackNestUnstakedCard from "./RansackNestUnstakedCard";
@@ -29,6 +30,8 @@ export default function RansackBox(props: {
   const [endProgress, setEndProgress] = useState(false);
   const [isChoosePlan, setIsChoosePlan] = useState(false);
 
+  const [startLoading, setStartLoading] = useState(false);
+
   const [nftType, setNftType] = useState(1);
   const [blazins, setBlazins] = useState<NFTType[]>();
   const [forceRender, setForceRender] = useState(false);
@@ -44,6 +47,18 @@ export default function RansackBox(props: {
   >([]);
 
   const [isShowNfts, setIsShowNfts] = useState(false);
+
+  const update = () => {
+    setIsEmpty(false);
+    setIsMissionSelect(false);
+    setMissionId(-1);
+    setPlanId(-1);
+    setEndProgress(false);
+    setIsChoosePlan(false);
+    setSelectedNest(undefined);
+    setSelectedWpNfts([]);
+    updatePage();
+  };
 
   const handleSelect = (mint: string) => {
     let nfts = blazins;
@@ -338,7 +353,7 @@ export default function RansackBox(props: {
                         className="start-mission"
                         onClick={() => setIsChoosePlan(true)}
                       >
-                        Start Mission
+                        <>Start Mission</>
                       </button>
                     </div>
                   </div>
@@ -386,17 +401,20 @@ export default function RansackBox(props: {
                   <div className="ransack-nft-modal">
                     {blazins &&
                       blazins.length !== 0 &&
-                      blazins.map((item, key) => (
-                        <UnstakedCardAtNest
-                          key={key}
-                          handleSelect={handleSelect}
-                          id={item.id}
-                          mint={item.mint}
-                          name={item.name}
-                          image={item.image}
-                          selected={item.selected}
-                        />
-                      ))}
+                      blazins.map(
+                        (item, key) =>
+                          !item.staked && (
+                            <UnstakedCardAtNest
+                              key={key}
+                              handleSelect={handleSelect}
+                              id={item.id}
+                              mint={item.mint}
+                              name={item.name}
+                              image={item.image}
+                              selected={item.selected}
+                            />
+                          )
+                      )}
                   </div>
                 )}
                 {nftType === 2 && (
@@ -429,20 +447,21 @@ export default function RansackBox(props: {
                   <h3 className="box-title">Choose your Staking Plan</h3>
                   <button
                     className="back-btn box-icon-button"
-                    onClick={() => setIsMissionSelect(false)}
+                    onClick={() => setIsChoosePlan(false)}
                   >
                     <BoxBackIcon />
                   </button>
                   <div className="plans-box">
                     <RansackPlanItem
                       wallet={wallet}
+                      missionId={missionId}
                       title="10 days"
                       description={
                         <p>
                           Lock 100 $BLAZE <br />7 $BLAZE a day
                         </p>
                       }
-                      updatePage={updatePage}
+                      updatePage={update}
                       lockTime={10}
                       selectedNest={selectedNest}
                       selectedWpNfts={selectedMainWpNfts}
@@ -451,6 +470,7 @@ export default function RansackBox(props: {
                     />
                     <RansackPlanItem
                       wallet={wallet}
+                      missionId={missionId}
                       title="20 days"
                       description={
                         <p>
@@ -458,7 +478,7 @@ export default function RansackBox(props: {
                           10 $BLAZE a day
                         </p>
                       }
-                      updatePage={updatePage}
+                      updatePage={update}
                       lockTime={20}
                       selectedNest={selectedNest}
                       selectedWpNfts={selectedMainWpNfts}
@@ -467,6 +487,7 @@ export default function RansackBox(props: {
                     />
                     <RansackPlanItem
                       wallet={wallet}
+                      missionId={missionId}
                       title="35 days"
                       description={
                         <p>
@@ -474,7 +495,7 @@ export default function RansackBox(props: {
                           15 $BLAZE a day
                         </p>
                       }
-                      updatePage={updatePage}
+                      updatePage={update}
                       lockTime={35}
                       selectedNest={selectedNest}
                       selectedWpNfts={selectedMainWpNfts}

@@ -320,7 +320,6 @@ html {
     }
     &::before {
         margin: -2px;
-        // content: "";
         position: absolute;
         left: 0;
         top: 0;
@@ -538,6 +537,11 @@ html {
         background-color: #0fdc82;
         color: #1e1e1e;
     }
+    &:disabled {
+        pointer-events: none;
+        border-color: #505050;
+        color: #a0a0a0;
+    }
 }
 .nft-gallery {
     display: flex;
@@ -672,12 +676,7 @@ html {
 }
 
 .box-overlay {
-    // position: absolute;
     backdrop-filter: blur(4px);
-    // left: 0;
-    // top: 0;
-    // width: calc(100% - 64px);
-    // padding: 32px;
     border-radius: 10px;
     background: #1e1e1e;
     z-index: 100;
@@ -765,8 +764,6 @@ button {
 
 .overlay-close {
     position: absolute;
-    // right: 32px;
-    // top: 32px;
     right: 0;
     top: 0;
     border: none;
@@ -855,8 +852,8 @@ button {
             }
             img {
                 width: 54px;
-                margin-top: 32px;
-                margin-bottom: 32px;
+                margin-top: 15px;
+                margin-bottom: 15px;
             }
             button.overlay-collect {
                 cursor: pointer;
@@ -878,6 +875,53 @@ button {
                 &:hover {
                     background-color: #2e2e2e;
                 }
+            }
+        }
+    }
+    &.ended-card {
+        background-color: #0fdc82;
+        .staked-content {
+            .content-head {
+                h3 {
+                    color: #1e1e1e;
+                }
+                .reward-mark {
+                    color: #1e1e1e;
+                }
+            }
+            .box {
+                h4 {
+                    color: #1e1e1e;
+                }
+            }
+        }
+        .countdown {
+            * {
+                color: #1e1e1e;
+            }
+        }
+    }
+    &.nested-card {
+        pointer-events: none !important;
+        background-color: #e6c30f;
+        .staked-content {
+            .content-head {
+                h3 {
+                    color: #1e1e1e;
+                }
+                .reward-mark {
+                    color: #1e1e1e;
+                }
+            }
+            .box {
+                h4 {
+                    color: #1e1e1e;
+                }
+            }
+        }
+        .countdown {
+            * {
+                color: #1e1e1e;
             }
         }
     }
@@ -1437,8 +1481,7 @@ button {
         font-size: 14px;
         line-height: 15px;
         color: #ffffff;
-        width: 70px;
-        margin-right: 30px;
+        width: 100px;
     }
     .countdown {
         width: 140px;
@@ -1589,6 +1632,11 @@ button {
     color: #ffffff;
     padding: 10px 30px;
     border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: auto;
+    margin-left: auto;
     &:hover {
         background-color: #0fdc82;
         color: #1e1e1e;

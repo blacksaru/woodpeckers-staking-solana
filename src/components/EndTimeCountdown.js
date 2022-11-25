@@ -1,7 +1,8 @@
 import moment from "moment";
 import Countdown from "react-countdown";
+import { EPOCH } from "../contexts/type";
 
-export default function EndTimeCountdown({ endTime, endAction, duration, ...props }) {
+export default function EndTimeCountdown({ endTime, endAction, duration, nested, ...props }) {
     const renderer = ({ days, hours, minutes, seconds, completed }) => {
         if (completed) {
             // return <span>{moment(endTime).fromNow()}</span>

@@ -326,6 +326,7 @@ export const ransackToPool = async (
   woodPecker: {
     mint: PublicKey;
   }[],
+  style: number,
   lockTime: number,
   tier: number,
   setLoading: Function,
@@ -348,7 +349,7 @@ export const ransackToPool = async (
     setLoading(true);
     let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
       userAddress,
-      "user-ransack-pool",
+      "user-ransack-pool-1",
       STAKING_PROGRAM_ID
     );
 
@@ -357,15 +358,19 @@ export const ransackToPool = async (
       await initUserRansackPool(wallet);
     }
 
-    const tx = await createNestToPoolTx(
+    const tx = await createRansackToPoolTx(
       nestMint,
       woodPecker,
+      style,
       userAddress,
       program,
       solConnection,
       lockTime,
       tier
     );
+
+    console.log(tx, "target tx");
+
     const { blockhash } = await provider.connection.getLatestBlockhash(
       "confirmed"
     );
@@ -373,7 +378,6 @@ export const ransackToPool = async (
     tx.recentBlockhash = blockhash;
     if (wallet.signTransaction !== undefined) {
       const signedTx = await wallet.signTransaction(tx);
-
       const txId = await provider.connection.sendRawTransaction(
         signedTx.serialize(),
         { skipPreflight: true, maxRetries: 3, preflightCommitment: "confirmed" }
@@ -936,14 +940,14 @@ export const createInitUserRansackPoolTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
   console.log(USER_RANSACK_POOL_SIZE);
   let ix = SystemProgram.createAccountWithSeed({
     fromPubkey: userAddress,
     basePubkey: userAddress,
-    seed: "user-nest-pool",
+    seed: "user-ransack-pool-1",
     newAccountPubkey: userPoolKey,
     lamports: await connection.getMinimumBalanceForRentExemption(
       USER_RANSACK_POOL_SIZE
@@ -956,7 +960,7 @@ export const createInitUserRansackPoolTx = async (
   console.log("==>initializing user dual PDA", userPoolKey.toBase58());
   tx.add(ix);
   tx.add(
-    program.instruction.initializeUserDualPool({
+    program.instruction.initializeUserRansackPool({
       accounts: {
         userDualPool: userPoolKey,
         owner: userAddress,
@@ -1131,7 +1135,7 @@ export const createNestToPoolTx = async (
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
@@ -1173,6 +1177,7 @@ export const createNestToPoolTx = async (
         nestEditionInfo,
         nestMetadata,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1185,7 +1190,8 @@ export const createNestToPoolTx = async (
 
 export const createRansackToPoolTx = async (
   nestMint: PublicKey,
-  woodpecker: PublicKey[],
+  woodpecker: { mint: PublicKey }[],
+  style: number,
   userAddress: PublicKey,
   program: anchor.Program,
   connection: Connection,
@@ -1199,7 +1205,7 @@ export const createRansackToPoolTx = async (
 
   let userDualPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-nest-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
@@ -1217,16 +1223,19 @@ export const createRansackToPoolTx = async (
   }
   console.log("Nest NFT = ", nestMint.toBase58(), userNestAccount.toBase58());
 
-  let remainingAccounts = [];
+  let remainingAccounts: any = [];
   for (let i = 0; i < woodpecker.length; i++) {
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
-      woodpecker[i]
+      woodpecker[i].mint
     );
     if (!(await isExistAccount(userWoodAccount, connection))) {
-      let accountOfNFT = await getNFTTokenAccount(woodpecker[i], connection);
+      let accountOfNFT = await getNFTTokenAccount(
+        woodpecker[i].mint,
+        connection
+      );
       if (userWoodAccount.toBase58() != accountOfNFT.toBase58()) {
-        let nftOwner = await getOwnerOfNFT(woodpecker[i], connection);
+        let nftOwner = await getOwnerOfNFT(woodpecker[i].mint, connection);
         if (nftOwner.toBase58() == userAddress.toBase58())
           userWoodAccount = accountOfNFT;
         else if (nftOwner.toBase58() !== globalAuthority.toBase58()) {
@@ -1236,21 +1245,21 @@ export const createRansackToPoolTx = async (
     }
     console.log(
       "Woodpecker NFT = ",
-      woodpecker[i].toBase58(),
+      woodpecker[i].mint.toBase58(),
       userWoodAccount.toBase58()
     );
 
-    let woodEditionId = await Edition.getPDA(woodpecker[i]);
+    let woodEditionId = await Edition.getPDA(woodpecker[i].mint);
 
     remainingAccounts.push({
-      pubkey: woodpecker[i],
+      pubkey: woodpecker[i].mint,
       isSigner: false,
       isWritable: false,
     });
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
@@ -1275,28 +1284,35 @@ export const createRansackToPoolTx = async (
   }
 
   const nestMetadata = await getMetadata(nestMint);
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
 
   let tx = new Transaction();
 
   tx.add(
-    program.instruction.ransackToPool(bump, tier, new anchor.BN(lockTime), {
-      accounts: {
-        owner: userAddress,
-        globalAuthority,
-        userDualPool: userDualPoolKey,
-        userNestAccount,
-        nestMint,
-        userTokenAccount,
-        destTokenAccount,
-        nestEditionId,
-        nestMetadata,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      },
-      remainingAccounts,
-      instructions: [],
-      signers: [],
-    })
+    program.instruction.ransackToPool(
+      bump,
+      tier,
+      new anchor.BN(style),
+      new anchor.BN(lockTime),
+      {
+        accounts: {
+          owner: userAddress,
+          globalAuthority,
+          userDualPool: userDualPoolKey,
+          userNestAccount,
+          nestMint,
+          userTokenAccount,
+          destTokenAccount,
+          nestEditionInfo,
+          nestMetadata,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          tokenMetadataProgram: METAPLEX,
+        },
+        remainingAccounts,
+        instructions: [],
+        signers: [],
+      }
+    )
   );
 
   return tx;
@@ -1365,6 +1381,7 @@ export const createWithdrawNftTx = async (
         userRewardAccount: ret1.destinationAccounts[0],
         nftMint: mint,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1386,8 +1403,11 @@ export const createWithdrawNestNftTx = async (
     STAKING_PROGRAM_ID
   );
 
+  console.log(nestMint.toBase58(), "==================");
   let userNestAccount = await getAssociatedTokenAccount(userAddress, nestMint);
+  console.log(userNestAccount.toBase58());
   if (!(await isExistAccount(userNestAccount, connection))) {
+    console.log(nestMint.toBase58());
     let accountOfNFT = await getNFTTokenAccount(nestMint, connection);
     if (userNestAccount.toBase58() != accountOfNFT.toBase58()) {
       let nftOwner = await getOwnerOfNFT(nestMint, connection);
@@ -1417,11 +1437,16 @@ export const createWithdrawNestNftTx = async (
     STAKING_PROGRAM_ID
   );
 
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
   let woodPeckers = await getNestedData(userAddress, nestMint);
   if (woodPeckers === null) return;
   let remainingAccounts = [];
+
   for (let i = 0; i < woodPeckers.length; i++) {
+    console.log(PublicKey.default.toBase58());
+    if (woodPeckers[i].toBase58() === PublicKey.default.toBase58()) {
+      continue;
+    }
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
       woodPeckers[i]
@@ -1453,13 +1478,14 @@ export const createWithdrawNestNftTx = async (
     remainingAccounts.push({
       pubkey: userWoodAccount,
       isSigner: false,
-      isWritable: false,
+      isWritable: true,
     });
     remainingAccounts.push({
       pubkey: woodEditionId,
       isSigner: false,
       isWritable: false,
     });
+    console.log("+++++++++++++++++++++++");
   }
 
   let tx = new Transaction();
@@ -1477,8 +1503,9 @@ export const createWithdrawNestNftTx = async (
         rewardVault,
         userRewardAccount: ret.destinationAccounts[0],
         nestMint,
-        nestEditionId,
+        nestEditionInfo,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1538,6 +1565,11 @@ export const createWithdrawRansackNftTx = async (
   let remainingAccounts = [];
   if (woodPeckers === null) return;
   for (let i = 0; i < woodPeckers.length; i++) {
+    console.log(PublicKey.default.toBase58());
+    if (woodPeckers[i].toBase58() === PublicKey.default.toBase58()) {
+      continue;
+    }
+    console.log("hdhd");
     let userWoodAccount = await getAssociatedTokenAccount(
       userAddress,
       woodPeckers[i]
@@ -1632,6 +1664,7 @@ export const createWithdrawRansackNftTx = async (
         nestMint,
         nestEditionId,
         tokenProgram: TOKEN_PROGRAM_ID,
+        tokenMetadataProgram: METAPLEX,
       },
       remainingAccounts,
       instructions: [],
@@ -1747,7 +1780,7 @@ export const createRansackClaimTx = async (
 ) => {
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
@@ -1826,10 +1859,7 @@ export const getUserPoolInfo = async (userAddress: PublicKey) => {
     STAKING_PROGRAM_ID,
     provider
   );
-  const userInfo: UserPool | null = await getUserPoolState(
-    userAddress,
-    program
-  );
+  const userInfo: UserPool | null = await getUserPoolState(userAddress);
   if (userInfo === null) return;
   return {
     owner: userInfo.owner.toBase58(),
@@ -1889,9 +1919,19 @@ export const getGlobalState = async (
 };
 
 export const getUserPoolState = async (
-  userAddress: PublicKey,
-  program: anchor.Program
+  userAddress: PublicKey
 ): Promise<UserPool | null> => {
+  const cloneWindow: any = window;
+  const provider = new anchor.AnchorProvider(
+    solConnection,
+    cloneWindow["solana"],
+    anchor.AnchorProvider.defaultOptions()
+  );
+  const program = new anchor.Program(
+    StakingIDL as anchor.Idl,
+    STAKING_PROGRAM_ID,
+    provider
+  );
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
     "user-pool",
@@ -1933,14 +1973,25 @@ export const getNestPoolState = async (
 };
 
 export const getRansackPoolState = async (
-  userAddress: PublicKey,
-  program: anchor.Program
+  userAddress: PublicKey
 ): Promise<UserRansackPool | null> => {
+  const cloneWindow: any = window;
+  const provider = new anchor.AnchorProvider(
+    solConnection,
+    cloneWindow["solana"],
+    anchor.AnchorProvider.defaultOptions()
+  );
+  const program = new anchor.Program(
+    StakingIDL as anchor.Idl,
+    STAKING_PROGRAM_ID,
+    provider
+  );
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-ransack-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
+  console.log(userPoolKey.toBase58());
   try {
     let userPoolState = await program.account.userRansackPool.fetch(
       userPoolKey

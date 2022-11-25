@@ -9,6 +9,7 @@ import UnstakedCardAtNest from "./UnstakedCardAtNest";
 import { PublicKey } from "@solana/web3.js";
 import { errorAlert } from "./toastGroup";
 import NestPlanItem from "./NestPlanItem";
+import { getNestPoolState, getRansackPoolState } from "../contexts/transaction";
 
 export default function NestCollectionBox(props: {
   wallet: WalletContextState;
@@ -77,6 +78,19 @@ export default function NestCollectionBox(props: {
     setIsReady(true);
   };
 
+  const getStakedNests = async () => {
+    if (wallet.publicKey === null) return;
+    if (nestNftList === undefined) return;
+    let nests = nestNftList;
+    const nested = await getNestPoolState(wallet.publicKey);
+    const missioned = await getRansackPoolState(wallet.publicKey);
+    console.log(nested, "==> nested");
+    console.log(missioned, "==> missioned");
+    if (missioned) {
+      for (let i = 0; i < missioned.stakedCount.toNumber(); i++) {}
+    }
+  };
+
   const handleSelect = (mint: string) => {
     let nfts = blazins;
     let selected: { mint: PublicKey }[] = [];
@@ -123,8 +137,16 @@ export default function NestCollectionBox(props: {
           break;
       }
     }
+    // getStakedNests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedNest, wpNftList]);
+  }, [
+    selectedNest,
+    wpNftList,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify(nestNftList),
+    wallet.publicKey,
+    wallet.connected,
+  ]);
 
   return (
     <div
@@ -229,17 +251,20 @@ export default function NestCollectionBox(props: {
                     <div className="nest-box-list">
                       {blazins &&
                         blazins.length !== 0 &&
-                        blazins.map((item, key) => (
-                          <UnstakedCardAtNest
-                            key={key}
-                            id={item.id}
-                            handleSelect={handleSelect}
-                            mint={item.mint}
-                            name={item.name}
-                            image={item.image}
-                            selected={item.selected}
-                          />
-                        ))}
+                        blazins.map(
+                          (item, key) =>
+                            !item.staked && (
+                              <UnstakedCardAtNest
+                                key={key}
+                                id={item.id}
+                                handleSelect={handleSelect}
+                                mint={item.mint}
+                                name={item.name}
+                                image={item.image}
+                                selected={item.selected}
+                              />
+                            )
+                        )}
                     </div>
                     <button
                       className="btn-action"
