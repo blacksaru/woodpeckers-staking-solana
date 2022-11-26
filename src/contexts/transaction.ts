@@ -1655,13 +1655,29 @@ export const createWithdrawRansackNftTx = async (
   let tx = new Transaction();
 
   if (ret.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
-  if (ret1.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
-  if (ret2.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
+  if (ret1.instructions.length > 0)
+    ret1.instructions.map(
+      (
+        ix:
+          | anchor.web3.TransactionInstruction
+          | anchor.web3.TransactionInstructionCtorFields
+          | anchor.web3.Transaction
+      ) => tx.add(ix)
+    );
+  if (ret2.instructions.length > 0)
+    ret2.instructions.map(
+      (
+        ix:
+          | anchor.web3.TransactionInstruction
+          | anchor.web3.TransactionInstructionCtorFields
+          | anchor.web3.Transaction
+      ) => tx.add(ix)
+    );
 
   console.log("==> withdrawing", nestMint.toBase58());
 
   tx.add(
-    program.instruction.withdrawNestNftFromPool(bump, {
+    program.instruction.withdrawRansackNftFromPool(bump, {
       accounts: {
         owner: userAddress,
         globalAuthority,

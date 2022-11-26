@@ -7,6 +7,7 @@ import { claimRansack } from "../contexts/transaction";
 import { EPOCH } from "../contexts/type";
 import { getNetworkTime } from "../contexts/utils";
 import { NFTType } from "../pages/staking";
+import MissionRewardModal from "./MissionRewardModal";
 import RansackEndTimeCountdown from "./RansackEndTimeCountdown";
 
 export default function MissionItem(props: {
@@ -39,6 +40,11 @@ export default function MissionItem(props: {
   const [styleSubText, setStyleSubText] = useState("Intermediate");
   const [stakedDays, setStakedDays] = useState(0);
 
+  const [opened, setOpened] = useState(false);
+  const handleModalClose = () => {
+    setOpened(false);
+  };
+
   const getNowTime = async () => {
     const now = (await getNetworkTime()) as number;
     console.log(now);
@@ -50,11 +56,8 @@ export default function MissionItem(props: {
   const handleClaimRansack = async () => {
     if (nest) {
       try {
-        await claimRansack(
-          wallet,
-          new PublicKey(nest.mint),
-          setLoading,
-          updatePage
+        await claimRansack(wallet, new PublicKey(nest.mint), setLoading, () =>
+          setOpened(true)
         );
       } catch (error) {
         console.log(error);
@@ -147,6 +150,16 @@ export default function MissionItem(props: {
           )}
         </>
       )}
+      <MissionRewardModal
+        wallet={wallet}
+        opened={opened}
+        // opened={true}
+        onClose={() => handleModalClose()}
+        nest={nest}
+        // style={style}
+        // rewardAmount={rewardAmount}
+        // rewardStyle={rewardStyle}
+      />
     </div>
   );
 }
