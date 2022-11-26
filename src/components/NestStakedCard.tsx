@@ -31,7 +31,6 @@ export default function NestStakedCard(props: {
     updatePage,
   } = props;
 
-  console.log(nest, wpNfts, "++++=");
   const [loading, setLoading] = useState(false);
   const [claimLoading, setClaimLoading] = useState(false);
 

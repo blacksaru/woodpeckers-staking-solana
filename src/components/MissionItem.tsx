@@ -1,6 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
+import { ClipLoader } from "react-spinners";
+import { claimRansack } from "../contexts/transaction";
 import { EPOCH } from "../contexts/type";
 import { getNetworkTime } from "../contexts/utils";
 import { NFTType } from "../pages/staking";
@@ -12,19 +15,86 @@ export default function MissionItem(props: {
   wpNfts: NFTType[];
   updatePage: Function;
   lockTime: number;
+  stakedTime: number;
   isEnd: boolean;
+  style: number;
+  rewardAmount: number;
+  rewardStyle: number;
 }) {
-  const { nest, wpNfts, lockTime, isEnd, updatePage } = props;
+  const {
+    wallet,
+    nest,
+    wpNfts,
+    lockTime,
+    stakedTime,
+    isEnd,
+    updatePage,
+    style,
+    rewardAmount,
+    rewardStyle,
+  } = props;
   const [now, setNow] = useState(Math.floor(new Date().getTime() / 1000));
+  const [styleText, setStyleText] = useState("Birdcamp");
+  const [rewardPerDay, setRewardPerDay] = useState(7);
+  const [styleSubText, setStyleSubText] = useState("Intermediate");
+  const [stakedDays, setStakedDays] = useState(0);
 
   const getNowTime = async () => {
     const now = (await getNetworkTime()) as number;
     console.log(now);
     setNow(now);
   };
+
+  const [loading, setLoading] = useState(false);
+
+  const handleClaimRansack = async () => {
+    if (nest) {
+      try {
+        await claimRansack(
+          wallet,
+          new PublicKey(nest.mint),
+          setLoading,
+          updatePage
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
   useEffect(() => {
     getNowTime();
-  }, [props.nest]);
+    switch (style) {
+      case 0:
+        setStyleText("Birdcamp");
+        setStyleSubText("Intermediate");
+        break;
+      case 1:
+        setStyleText("Downtown");
+        setStyleSubText("Normal");
+        break;
+      case 2:
+        setStyleText("Hunted Pier");
+        setStyleSubText("Hard");
+        break;
+      case 3:
+        setStyleText("Sewer");
+        setStyleSubText("Impossible");
+        break;
+    }
+    const lockDays = (lockTime - stakedTime) / EPOCH;
+    setStakedDays(lockDays);
+    switch (lockDays) {
+      case 10:
+        setRewardPerDay(7);
+        break;
+      case 20:
+        setRewardPerDay(10);
+        break;
+      case 35:
+        setRewardPerDay(15);
+        break;
+    }
+  }, [props.nest, style, stakedTime, lockTime]);
 
   return (
     <div className={`one-mission ${now > lockTime ? "ended" : ""}`}>
@@ -38,8 +108,8 @@ export default function MissionItem(props: {
             </div>
             <div className="detail">
               <div className="label">staked</div>
-              <h4>Intermediate</h4>
-              <h3>Birdcamp</h3>
+              <h4>{styleSubText}</h4>
+              <h3>{styleText}</h3>
               <div className="title-box">
                 <div className="title-item">
                   <h5>Woodpeckers</h5>
@@ -47,11 +117,11 @@ export default function MissionItem(props: {
                 </div>
                 <div className="title-item">
                   <h5>Staked</h5>
-                  <span>10 Days</span>
+                  <span>{stakedDays} Days</span>
                 </div>
                 <div className="title-item">
                   <h5>$Blaze x day</h5>
-                  <span>5 $BLAZE</span>
+                  <span>{rewardPerDay} $BLAZE</span>
                 </div>
               </div>
             </div>
@@ -66,7 +136,13 @@ export default function MissionItem(props: {
           {now > lockTime && (
             <div className="ransack-time-ended">
               <p>Time Ended</p>
-              <button className="">claim rewards</button>
+              <button className="" onClick={() => handleClaimRansack()}>
+                {loading ? (
+                  <ClipLoader size={12} color="#fff" />
+                ) : (
+                  <>claim rewards</>
+                )}
+              </button>
             </div>
           )}
         </>

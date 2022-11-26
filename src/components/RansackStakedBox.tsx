@@ -5,7 +5,18 @@ import React, { useEffect, useState } from "react";
 import { getRansackPoolState } from "../contexts/transaction";
 import { NFTType } from "../pages/staking";
 import MissionItem from "./MissionItem";
-import { NestedType } from "./NestStakedCollectionBox";
+
+export interface MissionedType {
+  claimable: number;
+  emission: number;
+  lockTime: number;
+  stakedTime: number;
+  nest: NFTType;
+  woodpecker: NFTType[];
+  style: number;
+  rewardAmount: number;
+  rewardStyle: number;
+}
 
 export default function RansackStakedBox(props: {
   wallet: WalletContextState;
@@ -19,14 +30,14 @@ export default function RansackStakedBox(props: {
     props;
 
   const [forceRender, setForceRender] = useState(false);
-  const [missionNfts, setMissionNfts] = useState<NestedType[]>();
+  const [missionNfts, setMissionNfts] = useState<MissionedType[]>();
   const getMissionItems = async () => {
     if (wallet.publicKey === null) return;
     if (nestNfts === undefined) return;
     if (wpNfts === undefined) return;
     const missions = await getRansackPoolState(wallet.publicKey);
     console.log(missions, "!!!!=>!!!");
-    let list: NestedType[] = [];
+    let list: MissionedType[] = [];
 
     if (missions) {
       for (let i = 0; i < missions.stakedCount.toNumber(); i++) {
@@ -48,6 +59,9 @@ export default function RansackStakedBox(props: {
           lockTime: missions.staking[i].lockTime.toNumber(),
           stakedTime: missions.staking[i].stakedTime.toNumber(),
           nest: nest,
+          style: missions.staking[i].style.toNumber(),
+          rewardAmount: missions.staking[i].rewardAmount.toNumber(),
+          rewardStyle: missions.staking[i].rewardStyle.toNumber(),
           woodpecker: wps,
         });
       }
@@ -80,8 +94,12 @@ export default function RansackStakedBox(props: {
                 wallet={wallet}
                 lockTime={item.lockTime}
                 nest={item.nest}
+                style={item.style}
+                rewardAmount={item.rewardAmount}
+                rewardStyle={item.rewardStyle}
                 isEnd={key === 4}
                 wpNfts={item.woodpecker}
+                stakedTime={item.stakedTime}
               />
             ))}
         </div>

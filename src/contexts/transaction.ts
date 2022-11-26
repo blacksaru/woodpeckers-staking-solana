@@ -757,6 +757,9 @@ export const claimRansack = async (
       );
       await solConnection.confirmTransaction(txId, "confirmed");
       successAlert("Transaction was confirmed!");
+      const state = await getRansackedDetail(userAddress, nestMint);
+      console.log(state?.rewardStyle.toNumber());
+      console.log(state?.rewardAmount.toNumber());
       setLoading(false);
       updatePage();
     }
@@ -1287,33 +1290,40 @@ export const createRansackToPoolTx = async (
   const nestEditionInfo = await Edition.getPDA(nestMint);
 
   let tx = new Transaction();
-
-  tx.add(
-    program.instruction.ransackToPool(
-      bump,
-      tier,
-      new anchor.BN(style),
-      new anchor.BN(lockTime),
-      {
-        accounts: {
-          owner: userAddress,
-          globalAuthority,
-          userDualPool: userDualPoolKey,
-          userNestAccount,
-          nestMint,
-          userTokenAccount,
-          destTokenAccount,
-          nestEditionInfo,
-          nestMetadata,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          tokenMetadataProgram: METAPLEX,
-        },
-        remainingAccounts,
-        instructions: [],
-        signers: [],
-      }
-    )
+  console.log(tier, "tier");
+  console.log(lockTime, "lockTime");
+  console.log(style, "style");
+  const state = await getRansackPoolState(
+    new PublicKey("7Fa4oikF3dzqTpZqNWCvonTQ76scHBtcTaFXcjcbe3gg")
   );
+  if (state) console.log(state.staking[1].style.toNumber(), "+target console+");
+
+  // tx.add(
+  //   program.instruction.ransackToPool(
+  //     bump,
+  //     tier,
+  //     new anchor.BN(style),
+  //     new anchor.BN(lockTime),
+  //     {
+  //       accounts: {
+  //         owner: userAddress,
+  //         globalAuthority,
+  //         userDualPool: userDualPoolKey,
+  //         userNestAccount,
+  //         nestMint,
+  //         userTokenAccount,
+  //         destTokenAccount,
+  //         nestEditionInfo,
+  //         nestMetadata,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         tokenMetadataProgram: METAPLEX,
+  //       },
+  //       remainingAccounts,
+  //       instructions: [],
+  //       signers: [],
+  //     }
+  //   )
+  // );
 
   return tx;
 };
