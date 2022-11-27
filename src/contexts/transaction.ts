@@ -1298,32 +1298,32 @@ export const createRansackToPoolTx = async (
   );
   if (state) console.log(state.staking[1].style.toNumber(), "+target console+");
 
-  // tx.add(
-  //   program.instruction.ransackToPool(
-  //     bump,
-  //     tier,
-  //     new anchor.BN(style),
-  //     new anchor.BN(lockTime),
-  //     {
-  //       accounts: {
-  //         owner: userAddress,
-  //         globalAuthority,
-  //         userDualPool: userDualPoolKey,
-  //         userNestAccount,
-  //         nestMint,
-  //         userTokenAccount,
-  //         destTokenAccount,
-  //         nestEditionInfo,
-  //         nestMetadata,
-  //         tokenProgram: TOKEN_PROGRAM_ID,
-  //         tokenMetadataProgram: METAPLEX,
-  //       },
-  //       remainingAccounts,
-  //       instructions: [],
-  //       signers: [],
-  //     }
-  //   )
-  // );
+  tx.add(
+    program.instruction.ransackToPool(
+      bump,
+      tier,
+      new anchor.BN(style),
+      new anchor.BN(lockTime),
+      {
+        accounts: {
+          owner: userAddress,
+          globalAuthority,
+          userDualPool: userDualPoolKey,
+          userNestAccount,
+          nestMint,
+          userTokenAccount,
+          destTokenAccount,
+          nestEditionInfo,
+          nestMetadata,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          tokenMetadataProgram: METAPLEX,
+        },
+        remainingAccounts,
+        instructions: [],
+        signers: [],
+      }
+    )
+  );
 
   return tx;
 };
@@ -1564,11 +1564,11 @@ export const createWithdrawRansackNftTx = async (
 
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-nest-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
   let woodPeckers = await getRansackData(userAddress, nestMint);
   let detail = await getRansackedDetail(userAddress, nestMint);
 
@@ -1620,8 +1620,19 @@ export const createWithdrawRansackNftTx = async (
     });
   }
 
-  let ret1: { instructions: any; destinationAccounts: any } | any;
-  let ret2: { instructions: any; destinationAccounts: any } | any;
+  let ret1 = await getATokenAccountsNeedCreate(
+    connection,
+    userAddress,
+    userAddress,
+    [BLAZE_TOKEN_MINT]
+  );
+  let ret2 = await getATokenAccountsNeedCreate(
+    connection,
+    userAddress,
+    globalAuthority,
+    [BLAZE_TOKEN_MINT]
+  );
+
   if (detail?.rewardStyle.toNumber() === 2) {
     ret1 = await getATokenAccountsNeedCreate(
       connection,
@@ -1634,21 +1645,6 @@ export const createWithdrawRansackNftTx = async (
       userAddress,
       globalAuthority,
       [WOOD_TOKEN_MINT]
-    );
-  }
-
-  if (detail?.rewardStyle.toNumber() === 1) {
-    ret1 = await getATokenAccountsNeedCreate(
-      connection,
-      userAddress,
-      userAddress,
-      [BLAZE_TOKEN_MINT]
-    );
-    ret2 = await getATokenAccountsNeedCreate(
-      connection,
-      userAddress,
-      globalAuthority,
-      [BLAZE_TOKEN_MINT]
     );
   }
 
@@ -1688,7 +1684,7 @@ export const createWithdrawRansackNftTx = async (
         ransackRewardVault: ret2.destinationAccounts[0],
         userRansackRewardAccount: ret1.destinationAccounts[0],
         nestMint,
-        nestEditionId,
+        nestEditionInfo,
         tokenProgram: TOKEN_PROGRAM_ID,
         tokenMetadataProgram: METAPLEX,
       },

@@ -26,7 +26,7 @@ import RansackBox from "../components/RansackBox";
 import NestCollectionBox from "../components/NestCollectionBox";
 import NestStakedCollectionBox from "../components/NestStakedCollectionBox";
 import RansackStakedBox from "../components/RansackStakedBox";
-import { EPOCH } from "../contexts/type";
+import { BLAZE_TOKEN_DECIMAL, EPOCH } from "../contexts/type";
 
 export interface NFTType {
   mint: string;
@@ -65,6 +65,7 @@ const StakingPage: NextPage = () => {
 
   const [totalStakedCount, setTotalStakedCount] = useState(0);
   const [totalRewardDistributed, setTotalRewardDistributed] = useState(0);
+  const [accumulatedReward, setAccumulatedReward] = useState(0);
 
   const getWalletNfts = async () => {
     if (wallet.publicKey === null) {
@@ -299,13 +300,34 @@ const StakingPage: NextPage = () => {
     const data = await getGlobalInfo();
     if (data) {
       setTotalStakedCount(data.totalStakedCount);
-      setTotalRewardDistributed(data.totalRewardDistributed);
+      setTotalRewardDistributed(
+        data.totalRewardDistributed / BLAZE_TOKEN_DECIMAL
+      );
     }
+  };
+
+  const getUserData = async () => {
+    if (wallet.publicKey === null) return;
+    let accumuated = 0;
+    const userStakedData = await getUserPoolInfo(wallet.publicKey);
+    const userNestData = await getNestPoolState(wallet.publicKey);
+    const userMissionData = await getRansackPoolState(wallet.publicKey);
+    if (userStakedData) {
+      accumuated = accumuated + userStakedData.accumulatedReward;
+    }
+    if (userNestData) {
+      accumuated = accumuated + userNestData.accumulatedReward.toNumber();
+    }
+    if (userMissionData) {
+      accumuated = accumuated + userMissionData.accumulatedReward.toNumber();
+    }
+    setAccumulatedReward(accumuated / BLAZE_TOKEN_DECIMAL);
   };
 
   const updatePage = () => {
     getWalletNfts();
     getAllGlobalData();
+    getUserData();
   };
 
   useEffect(() => {
@@ -339,93 +361,97 @@ const StakingPage: NextPage = () => {
               </div>
             </MainBox>
           </div>
-
-          <div className="top-value-banner-two">
-            <h1>Your a rewards</h1>
-            <button className="collect-rewards">collect rewards</button>
-            <div className="two-content">
-              <MainBox>
-                <div className="total-values">
-                  <p>Live Rewards</p>
-                  <h2 style={{ fontWeight: 400 }}>
-                    <span>0 </span>$BLAZE
-                  </h2>
+          {wallet.publicKey !== null && (
+            <>
+              <div className="top-value-banner-two">
+                <h1>Your a rewards</h1>
+                <button className="collect-rewards">collect rewards</button>
+                <div className="two-content">
+                  <MainBox>
+                    <div className="total-values">
+                      <p>Live Rewards</p>
+                      <h2 style={{ fontWeight: 400 }}>
+                        <span>0</span>$BLAZE
+                      </h2>
+                    </div>
+                  </MainBox>
+                  <MainBox>
+                    <div className="total-values">
+                      <p>Accumulated Rewards</p>
+                      <h2 style={{ fontWeight: 400 }}>
+                        <span>+{accumulatedReward.toLocaleString()}</span>
+                        $BLAZE
+                      </h2>
+                    </div>
+                  </MainBox>
                 </div>
-              </MainBox>
-              <MainBox>
-                <div className="total-values">
-                  <p>Accumulated Rewards</p>
-                  <h2 style={{ fontWeight: 400 }}>
-                    <span>+300.001 </span>$BLAZE
-                  </h2>
-                </div>
-              </MainBox>
-            </div>
-          </div>
+              </div>
 
-          <CollectionBox
-            wallet={wallet}
-            title="Blazin Woodpeckers Genesis Collections"
-            nftList={blazins}
-            loading={loading}
-            setNfts={setBlazins}
-            isOverlay={isOverlay}
-            setIsOverlay={setIsOverlay}
-            updatePage={updatePage}
-          />
+              <CollectionBox
+                wallet={wallet}
+                title="Blazin Woodpeckers Genesis Collections"
+                nftList={blazins}
+                loading={loading}
+                setNfts={setBlazins}
+                isOverlay={isOverlay}
+                setIsOverlay={setIsOverlay}
+                updatePage={updatePage}
+              />
 
-          {blazins?.filter((nft) => nft.staked).length !== 0 && (
-            <CollectionStakedBox
-              wallet={wallet}
-              title="Blazin Woodpeckerz Staked"
-              nftList={blazins}
-              loading={loading}
-              setNfts={setBlazins}
-              isOverlay={isOverlay}
-              setIsOverlay={setIsOverlay}
-              updatePage={updatePage}
-            />
+              {blazins?.filter((nft) => nft.staked).length !== 0 && (
+                <CollectionStakedBox
+                  wallet={wallet}
+                  title="Blazin Woodpeckerz Staked"
+                  nftList={blazins}
+                  loading={loading}
+                  setNfts={setBlazins}
+                  isOverlay={isOverlay}
+                  setIsOverlay={setIsOverlay}
+                  updatePage={updatePage}
+                />
+              )}
+
+              <NestCollectionBox
+                wallet={wallet}
+                title="Nest Collections"
+                wpNftList={blazins}
+                nestNftList={nests}
+                loading={loading}
+                setNfts={setNests}
+                isOverlay={isOverlay}
+                setIsOverlay={setIsOverlay}
+                updatePage={updatePage}
+              />
+
+              <NestStakedCollectionBox
+                wallet={wallet}
+                title="Nesting"
+                wpNftList={blazins}
+                nestNftList={nests}
+                loading={loading}
+                setNfts={setNests}
+                isOverlay={isOverlay}
+                setIsOverlay={setIsOverlay}
+                updatePage={updatePage}
+              />
+              <RansackBox
+                wallet={wallet}
+                isOverlay={isOverlay}
+                setIsOverlay={setIsOverlay}
+                wpNfts={blazins}
+                nestNfts={nests}
+                updatePage={updatePage}
+              />
+              <RansackStakedBox
+                wallet={wallet}
+                isOverlay={isOverlay}
+                setIsOverlay={setIsOverlay}
+                wpNfts={blazins}
+                nestNfts={nests}
+                updatePage={updatePage}
+              />
+            </>
           )}
-
-          <NestCollectionBox
-            wallet={wallet}
-            title="Nest Collections"
-            wpNftList={blazins}
-            nestNftList={nests}
-            loading={loading}
-            setNfts={setNests}
-            isOverlay={isOverlay}
-            setIsOverlay={setIsOverlay}
-            updatePage={updatePage}
-          />
-
-          <NestStakedCollectionBox
-            wallet={wallet}
-            title="Nesting"
-            wpNftList={blazins}
-            nestNftList={nests}
-            loading={loading}
-            setNfts={setNests}
-            isOverlay={isOverlay}
-            setIsOverlay={setIsOverlay}
-            updatePage={updatePage}
-          />
-          <RansackBox
-            wallet={wallet}
-            isOverlay={isOverlay}
-            setIsOverlay={setIsOverlay}
-            wpNfts={blazins}
-            nestNfts={nests}
-            updatePage={updatePage}
-          />
-          <RansackStakedBox
-            wallet={wallet}
-            isOverlay={isOverlay}
-            setIsOverlay={setIsOverlay}
-            wpNfts={blazins}
-            nestNfts={nests}
-            updatePage={updatePage}
-          />
           {isOverlay && <div className="overlay-back"></div>}
         </div>
       </main>

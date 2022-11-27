@@ -156,6 +156,7 @@ export default function MissionItem(props: {
         // opened={true}
         onClose={() => handleModalClose()}
         nest={nest}
+        updatePage={updatePage}
         // style={style}
         // rewardAmount={rewardAmount}
         // rewardStyle={rewardStyle}
