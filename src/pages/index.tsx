@@ -11,7 +11,7 @@ const Home: NextPage = () => {
     <>
       <Header />
 
-      <main className="pt-220">
+      <main className="pt-220 staking-page">
         <div className="container">
           <MainBox title="Blazin Woodpeckers">
             <div className="link-buttons">

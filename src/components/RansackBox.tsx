@@ -30,6 +30,7 @@ export default function RansackBox(props: {
   const [endProgress, setEndProgress] = useState(false);
   const [isChoosePlan, setIsChoosePlan] = useState(false);
 
+  const [missionCost, setMissionCost] = useState(0);
   const [startLoading, setStartLoading] = useState(false);
 
   const [nftType, setNftType] = useState(1);
@@ -151,7 +152,21 @@ export default function RansackBox(props: {
           break;
       }
     }
-  }, [selectedNest, wpNfts]);
+    switch (missionId) {
+      case 1:
+        setMissionCost(50);
+        break;
+      case 2:
+        setMissionCost(250);
+        break;
+      case 3:
+        setMissionCost(500);
+        break;
+      case 4:
+        setMissionCost(1000);
+        break;
+    }
+  }, [selectedNest, wpNfts, missionId]);
   return (
     <div
       className="main-box collection-box ransack"
@@ -347,7 +362,7 @@ export default function RansackBox(props: {
                       <h3>
                         Mission cost:
                         <br />
-                        <span>50 $BLAZE</span>
+                        <span>{missionCost} $BLAZE</span>
                       </h3>
                       <button
                         className="start-mission"

@@ -757,6 +757,9 @@ export const claimRansack = async (
       );
       await solConnection.confirmTransaction(txId, "confirmed");
       successAlert("Transaction was confirmed!");
+      const state = await getRansackedDetail(userAddress, nestMint);
+      console.log(state?.rewardStyle.toNumber());
+      console.log(state?.rewardAmount.toNumber());
       setLoading(false);
       updatePage();
     }
@@ -1287,6 +1290,13 @@ export const createRansackToPoolTx = async (
   const nestEditionInfo = await Edition.getPDA(nestMint);
 
   let tx = new Transaction();
+  console.log(tier, "tier");
+  console.log(lockTime, "lockTime");
+  console.log(style, "style");
+  const state = await getRansackPoolState(
+    new PublicKey("7Fa4oikF3dzqTpZqNWCvonTQ76scHBtcTaFXcjcbe3gg")
+  );
+  if (state) console.log(state.staking[1].style.toNumber(), "+target console+");
 
   tx.add(
     program.instruction.ransackToPool(
@@ -1554,11 +1564,11 @@ export const createWithdrawRansackNftTx = async (
 
   let userPoolKey = await anchor.web3.PublicKey.createWithSeed(
     userAddress,
-    "user-nest-pool",
+    "user-ransack-pool-1",
     STAKING_PROGRAM_ID
   );
 
-  const nestEditionId = await Edition.getPDA(nestMint);
+  const nestEditionInfo = await Edition.getPDA(nestMint);
   let woodPeckers = await getRansackData(userAddress, nestMint);
   let detail = await getRansackedDetail(userAddress, nestMint);
 
@@ -1610,8 +1620,19 @@ export const createWithdrawRansackNftTx = async (
     });
   }
 
-  let ret1: { instructions: any; destinationAccounts: any } | any;
-  let ret2: { instructions: any; destinationAccounts: any } | any;
+  let ret1 = await getATokenAccountsNeedCreate(
+    connection,
+    userAddress,
+    userAddress,
+    [BLAZE_TOKEN_MINT]
+  );
+  let ret2 = await getATokenAccountsNeedCreate(
+    connection,
+    userAddress,
+    globalAuthority,
+    [BLAZE_TOKEN_MINT]
+  );
+
   if (detail?.rewardStyle.toNumber() === 2) {
     ret1 = await getATokenAccountsNeedCreate(
       connection,
@@ -1627,31 +1648,32 @@ export const createWithdrawRansackNftTx = async (
     );
   }
 
-  if (detail?.rewardStyle.toNumber() === 1) {
-    ret1 = await getATokenAccountsNeedCreate(
-      connection,
-      userAddress,
-      userAddress,
-      [BLAZE_TOKEN_MINT]
-    );
-    ret2 = await getATokenAccountsNeedCreate(
-      connection,
-      userAddress,
-      globalAuthority,
-      [BLAZE_TOKEN_MINT]
-    );
-  }
-
   let tx = new Transaction();
 
   if (ret.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
-  if (ret1.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
-  if (ret2.instructions.length > 0) ret.instructions.map((ix) => tx.add(ix));
+  if (ret1.instructions.length > 0)
+    ret1.instructions.map(
+      (
+        ix:
+          | anchor.web3.TransactionInstruction
+          | anchor.web3.TransactionInstructionCtorFields
+          | anchor.web3.Transaction
+      ) => tx.add(ix)
+    );
+  if (ret2.instructions.length > 0)
+    ret2.instructions.map(
+      (
+        ix:
+          | anchor.web3.TransactionInstruction
+          | anchor.web3.TransactionInstructionCtorFields
+          | anchor.web3.Transaction
+      ) => tx.add(ix)
+    );
 
   console.log("==> withdrawing", nestMint.toBase58());
 
   tx.add(
-    program.instruction.withdrawNestNftFromPool(bump, {
+    program.instruction.withdrawRansackNftFromPool(bump, {
       accounts: {
         owner: userAddress,
         globalAuthority,
@@ -1662,7 +1684,7 @@ export const createWithdrawRansackNftTx = async (
         ransackRewardVault: ret2.destinationAccounts[0],
         userRansackRewardAccount: ret1.destinationAccounts[0],
         nestMint,
-        nestEditionId,
+        nestEditionInfo,
         tokenProgram: TOKEN_PROGRAM_ID,
         tokenMetadataProgram: METAPLEX,
       },
