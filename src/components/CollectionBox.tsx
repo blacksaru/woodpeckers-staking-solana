@@ -131,7 +131,7 @@ export default function CollectionBox(props: {
                   title="35 Days"
                   description={
                     <p>
-                      Lock in 300 $BLAZE <br /> 10 $BLAZE a day
+                      Lock in 300 $BLAZE <br /> 15 $BLAZE a day
                     </p>
                   }
                   lockTime={35}
@@ -148,7 +148,7 @@ export default function CollectionBox(props: {
             <div className="action-buttons">
               <button
                 className="btn-action"
-                disabled={selectedNfts.length === 0}
+                disabled={selectedNfts.length === 5}
                 onClick={() => handleIsReady("single")}
               >
                 stake
